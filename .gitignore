@@ -1,0 +1,6 @@
+# Large source PDFs / text extractions are tracked deliberately (see research/README.md).
+# Local scratch only:
+*.pyc
+__pycache__/
+.venv/
+.DS_Store
