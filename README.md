@@ -15,7 +15,11 @@ reduction, degradation, enhancement, revaluation.
 
 ## Status
 
-**Scoping.** No application code yet. Start with [`DESIGN.md`](DESIGN.md).
+**Scoping.** No application code yet. Start with [`DESIGN.md`](DESIGN.md), then the roadmap in
+[**issue #20**](https://github.com/SchmidtDSE/unseea/issues/20).
+
+Phases 1–2 need no new data ingest — deliberately, so the account-arithmetic correctness work runs in
+parallel with data acquisition rather than behind it.
 
 ## Contents
 
