@@ -6,10 +6,9 @@ account component, what do we already hold, what must we import, and what will t
 The premise is deliberate: we are *not* scoping to the existing GLEN catalog. The catalog is a starting
 inventory, and several of the layers already in it are the wrong choice for accounting work.
 
-> **Companion:** [`PROVENANCE.md`](PROVENANCE.md) classifies every layer by *evidence* — documented
-> standard vs. ARIES's actual choice vs. published national practice vs. our own pick. It revises two
-> recommendations in this document: ESA CCI LC has a comparability claim GLC_FCS30D does not (§1.2 there),
-> and `irrecoverable-carbon` is **not** the standard carbon source — IPCC Tier 1 coefficients are (§1.1).
+> **Companion:** [`PROVENANCE.md`](PROVENANCE.md) lists the planned layers with an *evidence* class for
+> each — named in SEEA/UNSD guidance, used by ARIES, used in a published national account, or our own
+> judgement — plus the roadmap issue tracking it. Read it to know where we deviate and why.
 
 ---
 

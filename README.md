@@ -27,7 +27,7 @@ parallel with data acquisition rather than behind it.
 |---|---|
 | [`DESIGN.md`](DESIGN.md) | The design document: what SEEA EA is, how ARIES for SEEA compares, the hard problems, the interaction model, and a phased plan |
 | [`DATA.md`](DATA.md) | Best-in-class data acquisition plan: UNSD Tier framework, per-account source selection, licence analysis, and how it lines up against the `data-workflows` tracker |
-| [`PROVENANCE.md`](PROVENANCE.md) | **Per-layer evidence:** is each layer the documented *standard* choice (with citation), what ARIES actually uses, what published national accounts used, or our own best-available pick |
+| [`PROVENANCE.md`](PROVENANCE.md) | **The planned layer list, with justification:** for each layer, is it named in SEEA/UNSD guidance, used by ARIES, used in a published national account, or our own judgement — plus the roadmap issue tracking it |
 | [`research/seea-ea-reference.md`](research/seea-ea-reference.md) | Distilled controlled vocabularies and table structures from the standard — the source for `system-prompt.md` and the app's lookup tables |
 | [`research/`](research/) | The SEEA EA standard (393 pp) and the UNSD Guidelines on Biophysical Modelling (221 pp), as published plus text extractions |
 

@@ -1,15 +1,15 @@
-# Layer provenance: standard choice, or our best guess?
+# Layer provenance: why each layer is in the app
 
-For every layer this app uses, this document answers one question: **is this what SEEA analyses actually
-use, or is it our own conceptual pick?** Each entry carries an evidence class and a citation you can check.
+The planned layer list for unseea, and the justification for each. One question per row: **is this the
+choice SEEA analyses actually make, or our own judgement call?**
 
-Companion to [`DATA.md`](DATA.md) (what to acquire) and [`DESIGN.md`](DESIGN.md) (why).
+Companion to [`DATA.md`](DATA.md) (acquisition and licensing) and [`DESIGN.md`](DESIGN.md) (design).
 
 ## Why this matters
 
 Two of our differentiators — *replication and validation* against published accounts, and *agreeing with
-ARIES where both can compute the same account* — only work if we know where we've deviated. A layer that
-is better in the abstract but different from what everyone else used will produce a divergence we cannot
+ARIES where both can compute the same account* — only work if we know where we deviate. A layer that is
+better in the abstract but different from what everyone else used produces a divergence we cannot
 attribute. Conceptual quality and comparability are **different axes**, and for a statistical standard
 comparability often wins.
 
@@ -17,213 +17,174 @@ comparability often wins.
 
 | Class | Meaning |
 |---|---|
-**①** | **Named in SEEA EA or the UNSD Guidelines on Biophysical Modelling** as a recommended source, model or reference classification. The closest thing to a standard that exists. |
-**②** | **Used by ARIES for SEEA** — the reference implementation's actual choice. |
-**③** | **Used in a published national/regional SEEA compilation** (UNSD Guidelines Tables 10, 23, 27). Documented practice. |
-**B** | **Best-available — our pick.** Either no standard exists, or the standard is unusable/superseded at global scale. Must be justified and flagged in the methods record. |
-**N** | **No standard exists** for this step at all. Every compiler improvises. |
+| **①** | **Named in SEEA EA or the UNSD Guidelines on Biophysical Modelling** as a recommended source, model or reference classification. The closest thing to a standard that exists. |
+| **②** | **Used by ARIES for SEEA** — the reference implementation's actual choice. |
+| **③** | **Used in a published national/regional SEEA compilation** (UNSD Tables 10, 23, 27). Documented practice. |
+| **B** | **Best-available — our judgement.** No standard exists, or the standard is superseded/unusable at global scale. Declare it in the methods record. |
+| **N** | **No standard exists** for this step. Every compiler improvises. |
 
-A layer can hold several classes. **①②③ together is as strong as this domain gets.**
+A row can hold several. **①②③ together is as strong as this domain gets.**
 
-Primary sources, both in [`research/`](research/):
-- **SEEA EA (2021)** White Cover, 393 pp
-- **UNSD Guidelines on Biophysical Modelling for Ecosystem Accounting (2022)**, 221 pp — Table 5 (land cover products), Table 10 (country extent practice), Tables 13–18 (condition indicators per ECT class), Table 23 (country condition practice), Table 25 (ES platform capability), Table 26 (Klein pollination dependence), Table 27 (country ES practice), Table 28 (major data sources), and §6.4.1–6.4.10 "Data sources and Tiers" per service.
+**Status** — ✅ in the catalog · ⏳ on the roadmap, with the issue that tracks it.
 
----
-
-## 1. Headline findings
-
-Three things the evidence changed.
-
-### 1.1 ⚠️ Our carbon layer is not the standard one
-
-**`irrecoverable-carbon` is class B, not ①.** The documented standard for global climate regulation is the
-**IPCC Tier 1 stock-difference method with IPCC default coefficients**, and specifically —
-UNSD §6.4.8.3 ¶314, describing ARIES for SEEA:
-
-> "ARIES for SEEA has implemented an IPCC Tier 1 approach following specifications of **Ruesch and Gibbs
-> (2008)**. It measures vegetation carbon and soil carbon separately. For vegetation carbon it is based on
-> a multi-layer look-up table with IPCC coefficients that stratify according to 5 data layers, namely:
-> **land cover, ecofloristic region, continent, presence of frontier forests** (proxy for forest
-> degradation), **recent occurrence of fires**. Soil carbon storage data rely on spatial data, e.g., from
-> **ISRIC** [SoilGrids]."
-
-Irrecoverable carbon (Noon et al. 2022) is a *conservation-prioritisation* construct — carbon that is
-manageable and unrecoverable within 30 years. That framing is deliberately **not** a total accounting
-stock, so it cannot fill the SEEA global climate regulation row without a caveat. It is excellent for
-targeting; it is the wrong quantity for an account.
-
-**Recommendation:** implement the **IPCC Tier 1 lookup** as the primary path — land cover × ecofloristic
-region × continent × IPCC coefficients, with soil carbon from SoilGrids. This is a *lookup table joined to
-our hex land cover*, which is cheap and exactly the shape h3 + DuckDB is good at. Keep
-`irrecoverable-carbon` as a secondary/thematic layer.
-
-Note also the standard's own admitted weakness (¶315): in both InVEST and ARIES "changes in storage are
-**predominantly driven by land cover change (not by ecosystem degradation)**." Our design attributes
-degradation to *condition* change, so we can improve on this — but that is a deliberate deviation to
-declare, not a silent upgrade.
-
-### 1.2 ⚠️ ESA CCI Land Cover has a comparability claim GLC_FCS30D does not
-
-I previously recommended **GLC_FCS30D** as the top ingest on quality grounds. That still holds on quality
-— but UNSD Table 5's shortlist of global land cover products (CCI, MODIS MCD12Q1, Copernicus, GlobeLand,
-FROM-GLC) singles out one for multi-year work, and the text is explicit (¶131):
-
-> "…the best available time series of land cover data products (**CCI LC 300m**)."
-
-**ESA CCI LC** is the only annual, decades-long product in that table (1992–2019 as published; now
-1992–2022+ via Copernicus C3S), and it is what much of the documented national practice used. So:
-
-| | ESA CCI LC 300 m | GLC_FCS30D 30 m |
-|---|---|---|
-| Evidence | **①③** — named by UNSD, used in practice | **B** — newer, not yet in any guidance |
-| Resolution | 300 m | 30 m |
-| Temporal | annual 1992–2022+ | 5-yearly 1985–2000, annual 2000–2022 |
-| Value to us | **comparability** with published accounts | **accuracy**, esp. fragmented landscapes |
-
-**Recommendation: ingest both**, and make CCI LC the conformance baseline for replication work (Phase 4)
-while GLC_FCS30D carries the fine-grained scenario and small-EAA work. If only one, CCI LC is the safer
-first move — it is also cheaper (300 m vs 30 m, global, annual). This is a revision to
-[`DATA.md`](DATA.md) §7.2 P0-3 and boettiger-lab/data-workflows#498.
-
-### 1.3 Ecosystem condition has essentially no global standard
-
-UNSD Table 23's documented condition accounts are **national data and bespoke indices** without
-exception — Norway's Nature Index (monitoring + expert judgment), South Africa's river Condition Index
-(expert review), Peru's Generalised Dissimilarity Modelling via BILBI, Mexico's Ecosystem Integrity Index
-(Bayesian network). Nothing global, nothing reusable.
-
-So most of our condition account is honestly class **B/N**, and we should say so. The exceptions —
-genuinely ① — are worth knowing, because they are exactly the layers already in or queued for the catalog:
-
-- **GLOBIO MSA** — named in UNSD Table 15 by name and mechanism ✅ *have*
-- **Biodiversity Intactness Index / PREDICTS** — named in Table 15 (#435)
-- **ISRIC SoilGrids** — named in Table 13 (soil organic carbon) and Table 28 (#446)
-- **MODIS NPP (MOD17) / Copernicus DMP / Copernicus LAI** — named in Table 17, with direct links (#499)
-- **SEDAC PM2.5 grids** (van Donkelaar) — named in Table 14
-- **HydroSHEDS, JRC Global Surface Water** — named in Tables 13 and 28 (#442, #441)
-
-That is a pleasant result: the condition imports I proposed on conceptual grounds turn out to be the
-named ones. **B3 functional** in particular — the empty class — is filled by precisely the datasets Table
-17 lists.
+Sources, both in [`research/`](research/): **SEEA EA (2021)** White Cover; **UNSD Guidelines on Biophysical
+Modelling (2022)** — Table 5 (land cover products), 10 (country extent practice), 13–18 (condition
+indicators per ECT class), 23 (country condition practice), 25 (ES platform capability), 26 (pollination
+dependence), 27 (country ES practice), 28 (major data sources), and §6.4.1–6.4.10 per service.
 
 ---
 
-## 2. By account
+## 1. Spatial units and accounting areas
 
-### 2.1 Ecosystem extent
-
-| Layer | Class | Evidence |
-|---|---|---|
-| **IUCN GET** (Level 3 EFG) | **①②** | SEEA EA Table 3.2 adopts GET as the **SEEA Ecosystem Type reference classification**; Table 4.1 compiles at "Level 3 – EFG". ARIES uses GET for its extent accounts. |
-| **World Terrestrial Ecosystems** (Sayre) | **①** *(weak)* | SEEA EA §3.67 names it among classifications for which "correspondences… will be developed" — endorsed as a crosswalk target, **not** as the reference classification. Our use of it as the wall-to-wall partition is a defensible engineering choice, not a mandate. |
-| **ESA CCI LC 300 m** | **①③** | UNSD Table 5; "best available time series" (¶131). |
-| **GLC_FCS30D 30 m** | **B** | Post-dates the guidance. Better; non-standard. |
-| **Copernicus CGLS-LC100 100 m** | **①** | UNSD Table 5. Single year in our catalog, so snapshot-only. |
-| **MODIS MCD12Q1, GlobeLand30, FROM-GLC** | **①** | UNSD Table 5 — alternatives, not our pick. |
-| **Hansen Global Forest Change** | **①** | UNSD Table 6 + §4.4.3 ¶131 for forest extent change (#434). |
-| **JRC Global Surface Water** | **①** | UNSD §4.4.3 ¶131 ("Surface Water Explorer"), Table 13 (#441). |
-| **Global Mangrove Watch, Allen Coral Atlas** | **B** | Not named. Conceptually best-available for MFT1/M1 ETs (#443, #444). |
-| **FAO LCCS classification** | **③** | Uganda and others used it (Table 10). |
-
-⚠️ **Nobody in Table 10 used IUCN GET.** Documented country practice used FAO LCCS (Uganda), Holdridge
-life zones (Guatemala), and national forest maps. GET is the standard *by the standard's own designation*
-and by ARIES's implementation — but it is not yet what national compilers did. Expect this to be a source
-of divergence in Phase 4 replication, and attribute it correctly.
-
-### 2.2 Ecosystem condition
-
-Per ECT class, from UNSD Tables 13–18. Class B/N unless marked.
-
-| ECT | Layer | Class | Evidence |
+| Layer | Class | Evidence | Status |
 |---|---|---|---|
-| A1 physical | SoilGrids (bulk density, texture) | **①** | Table 13 |
-| A1 | HydroSHEDS; Global Surface Water Explorer | **①** | Table 13 |
-| A1 | GRACE (water stocks); UN-IGRAC GGIS / GGMN (groundwater) | **①** | Table 13 |
-| A1 | GMIS / GISA impervious surface | **①** | Table 13 |
-| A2 chemical | **SoilGrids SOC**; GSDE; FAO GSOC | **①** | Table 13 (SOC), Table 28 |
-| A2 | **SEDAC PM2.5 grids** (van Donkelaar) | **①** | Table 14 |
-| A2 | GEMStat (SDG 6.3.2: total N, total P, pH, DO) | **①** | Table 14 — station data, sparse |
-| B1 compositional | **GLOBIO MSA** | **①** | Table 15, named with mechanism ✅ *have* |
-| B1 | **BII / PREDICTS** | **①** | Table 15 (#435) |
-| B1 | IUCN Red List; GBIF | **①** | Table 15 — 🔴 IUCN spatial is no-redistribution |
-| B2 structural | **GlobBiomass** → successor **ESA CCI Biomass** | **①** *(successor: B)* | Table 16 names GlobBiomass specifically; CCI Biomass is its continuation (#445) |
-| B2 | ETH canopy height | **B** | Post-dates guidance (#440) |
-| B3 functional | **MODIS NPP (MOD17)**, **Copernicus DMP**, **Copernicus LAI** | **①** | Table 17, with direct product links (#499) |
-| C1 landscape | **our own extent account** | **①** | Table 18: *"Ecosystem extent accounts likely form the basis for these indicators"* — this directly endorses the h3-derived approach in #7 |
-| C1 | Global Dam Watch; SEDAC gROADS; OpenStreetMap | **①** | Table 18 (barrier density) |
-| C1 | FLII; gHM | **B** | Not named; pressure-side proxies (#470, #210) |
-| — | Norway Nature Index · South Africa river CI · Peru BILBI/GDM · Mexico EII | **③** | Table 23 — all **national**, none reusable globally |
+| **UN M49 administrative entities** | **①②** | The EAA unit ARIES for SEEA offers; the official statistical reporting geography | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| **FAO hydrological basins** | **②** | ARIES's basin EAA option | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| Overture divisions (country/region/county) | **B** | Our EAA workhorse — finer and better-maintained, but not the official reporting geography | ✅ |
+| HydroSHEDS / HydroBASINS | **①** | UNSD Tables 13, 28 | ⏳ dw#442, dw#223 |
+| USGS WBD (HUC2–12) | **B** | US basins, no global standing | ✅ |
+| WWF terrestrial ecoregions · MEOW | **B** | Not an EAA type in the standard. Our use is **reference-level stratification** (§2) and crosswalk tie-breaking | ✅ |
+| Protected areas (WDPA / PAD-US) | **①** | SEEA EA §3.2.3 names protected areas as an EAA type; basis of the Ch.13 thematic PA accounts | ✅ (🔴 licence — [#14](https://github.com/SchmidtDSE/unseea/issues/14)) |
 
-### 2.3 Ecosystem services
+Ingesting **UN M49** is the same reasoning as CCI LC below: for replication work, matching the reporting
+geography published accounts used is worth more than a finer boundary set.
 
-UNSD §6.4 models exactly ten services. Per-service Tier 1 standard:
+## 2. Ecosystem extent
 
-| Service | Standard Tier 1 | Class | Our pick / gap |
+| Layer | Class | Evidence | Status |
 |---|---|---|---|
-| **Crop provisioning** | InVEST Crop Production (12 staples statistical / 175 percentile); ARIES uses **SPAM** + **FAOSTAT** year-adjustment, then ecosystem contribution via **Vallecillo et al. 2019** (natural : natural+human inputs, energetic); FAO **GAEZ v4** Theme 4 | **①②** | SPAM 2020 + FAOSTAT (#501) — same method, newer SPAM. ✅ standard-aligned |
-| **Wood provisioning** | FAO FRA / FAOSTAT harvest, spatially allocated by observed forest change; ARIES is "the main multi-service platform with this capability" | **①②** | Hansen GFC (#434) + FAO. ✅ aligned |
-| **Air filtration** | Deposition × concentration × vegetation; i-Tree and ESTIMAP are the named platforms | **①** | SEDAC PM2.5 (①) + LAI. ✅ aligned |
-| **Soil erosion control** | InVEST SDR / LUCI (both compute pixel→stream **connectivity**); **ARIES implements RUSLE** (Martínez-López et al. 2019) | **①②** | **GloSEM = B** (not named, but RUSLE-based so methodologically aligned) |
-| **Water supply** | Measure **water abstraction**, not yield — SEEA EA ¶6.103 permits "volume of water abstracted" as the proxy; GRDC for calibration | **①** | ⚠️ our runoff/water-yield framing is **B** and measures the wrong quantity — see §3 |
-| **Water purification** | InVEST NDR (terrestrial N/P retention), distinguished from in-stream denitrification | **①** | Global NEWS loading = **B** |
-| **Water flow regulation** | InVEST / LUCI / ESTIMAP / Data4Nature | **①** | HydroSHEDS (①) + Aqueduct (**B**) |
-| **Global climate regulation** | **IPCC Tier 1 stock-difference**, IPCC default coefficients; ARIES via **Ruesch & Gibbs (2008)** stratified 5 ways; soil C from **ISRIC**; InVEST 4-pool lookup | **①②** | ⚠️ `irrecoverable-carbon` = **B** — see §1.1 |
-| **Pollination** | **InVEST crop pollination** (wild bees; index-based, *not empirically validated*); ARIES uses **ESTIMAP** (single generic pollinator); **Klein et al. 2007** dependency ratios | **①②** | Klein + InVEST logic. ✅ aligned |
-| **Recreation** | ARIES Explorer: **UNWTO** international-tourist country data spatialized by an **ESTIMAP** landscape-attractiveness model. Tier 2: InVEST geotagged photos — *"covers only the 2005-2017 period and appears to be no longer updated"* | **①②** | ⚠️ Chaplin-Kramer NCP nature-access = **B**, not the standard |
+| **IUCN GET Level 3 (EFG)** | **①②** | SEEA EA Table 3.2 adopts GET as the **SEEA Ecosystem Type reference classification**; Table 4.1 compiles at "Level 3 – EFG". ARIES uses GET for extent | ⏳ dw#438 |
+| **ESA CCI Land Cover 300 m** | **①③** | UNSD Table 5; §4.4.3 ¶131 calls it "the best available time series of land cover data products". Annual 1992–2022+. Widely used in national practice | ⏳ dw#498 |
+| **World Terrestrial Ecosystems** (Sayre) | **①** *(weak)* | SEEA EA §3.67 names it among classifications for which "correspondences… will be developed" — endorsed as a crosswalk target, not as the reference classification. Our use of it as the wall-to-wall partition is an engineering choice | ⏳ dw#438 |
+| **GLC_FCS30D 30 m** | **B** | Post-dates all guidance. Higher resolution and purpose-built for land-cover *dynamics*; carries no comparability claim | ⏳ dw#498 |
+| Copernicus CGLS-LC100 100 m | **①** | UNSD Table 5. Single year, so snapshot-only | ✅ |
+| NLCD Annual + Land Cover Change | **B** | US national product, no global standing; the only true annual change series we can reach today | ⏳ dw#453 |
+| **Hansen Global Forest Change** | **①** | UNSD Table 6, §4.4.3 ¶131 — forest extent change | ⏳ dw#434 |
+| **JRC Global Surface Water** | **①** | UNSD §4.4.3 ¶131 ("Surface Water Explorer"), Table 13 | ⏳ dw#441 |
+| Global Mangrove Watch · Allen Coral Atlas | **B** | Not named; best-available for MFT1 / M1 ecosystem types | ⏳ dw#443, dw#444 |
+| FAO LCCS classification | **③** | Uganda and others (Table 10) | n/a — classification |
 
-**Documented national practice** (Table 27) — the replication targets: Netherlands (13 services),
-UK/ONS, China (Ouyang et al. 2020), EU (Vallecillo/La Notte), Rwanda (Bagstad et al. 2019 — carbon,
-sediment, nutrient, water yield), South Africa (Turpie et al. 2021), USA (Warnell et al. 2020).
+**Two products, two jobs.** CCI LC is the **conformance baseline** for replication (Phase 4); GLC_FCS30D
+carries fine-grained scenario work and small EAAs. If only one lands first, CCI LC is both safer and much
+cheaper (300 m vs 30 m, global, annual).
 
-#### Correction: ARIES platform ≠ ARIES for SEEA Explorer
+⚠️ **No country in Table 10 used IUCN GET.** Documented practice used FAO LCCS (Uganda), Holdridge life
+zones (Guatemala), and national forest maps. GET is the standard by the standard's own designation and by
+ARIES's implementation, but not yet by practice — expect an attributable divergence in Phase 4.
 
-I earlier said ARIES does "four of ~27 services." That is true of the **Explorer**; it understates the
-**platform**. UNSD Table 25 credits the ARIES/k.LAB platform with: crop, grazed biomass, timber, NTFP
-(monetary only), water supply, global climate regulation, local climate (index), soil erosion control,
-flood mitigation, pollination, recreation. So the gap we're filling is the Explorer's *exposure* and its
-lack of scenarios — not a modelling deficit in ARIES.
+## 3. Ecosystem condition
 
-### 2.4 Monetary
+Per ECT class, from UNSD Tables 13–18.
 
-| Need | Class | Note |
+| ECT | Layer | Class | Evidence | Status |
+|---|---|---|---|---|
+| A1 physical | **SoilGrids 2.0** (bulk density, texture) | **①** | Table 13 | ⏳ dw#446 |
+| A1 | **HydroSHEDS** · **Global Surface Water Explorer** | **①** | Table 13 | ⏳ dw#442, dw#441 |
+| A1 | GRACE (water stocks) · UN-IGRAC GGIS/GGMN (groundwater) | **①** | Table 13 | ⏳ |
+| A1 | GMIS / GISA impervious surface | **①** | Table 13 | ⏳ |
+| A2 chemical | **SoilGrids SOC** · GSDE · FAO GSOC | **①** | Table 13, Table 28 | ⏳ dw#446 |
+| A2 | **SEDAC PM2.5 grids** (van Donkelaar) | **①** | Table 14 | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| A2 | GEMStat (SDG 6.3.2: total N, total P, pH, DO) | **①** | Table 14 — station data, sparse | ⏳ |
+| B1 compositional | **GLOBIO MSA** | **①** | Table 15, named with mechanism. Reference level built in ([0,1] vs undisturbed) | ✅ |
+| B1 | **Biodiversity Intactness Index / PREDICTS** | **①** | Table 15 | ⏳ dw#435 |
+| B1 | IUCN Red List · GBIF | **①** | Table 15 | ✅ (🔴 IUCN spatial) |
+| B2 structural | **ESA CCI Biomass** *(successor to GlobBiomass)* | **①** *(successor: B)* | Table 16 names **GlobBiomass** specifically; CCI Biomass continues it | ⏳ dw#445 |
+| B2 | ETH canopy height 10 m | **B** | Post-dates guidance | ⏳ dw#440 |
+| B3 functional | **MODIS NPP (MOD17)** · **Copernicus DMP** · **Copernicus LAI** | **①** | Table 17, with direct product links | ⏳ dw#499 |
+| C1 landscape | **derived from our own extent account** | **①** | Table 18: *"Ecosystem extent accounts likely form the basis for these indicators"* — direct endorsement of the h3 approach | ⏳ [#7](https://github.com/SchmidtDSE/unseea/issues/7) |
+| C1 | Global Dam Watch · SEDAC gROADS · OpenStreetMap | **①** | Table 18 (barrier density) | ⏳ |
+| C1 | FLII · gHM | **B** | Not named; pressure-side proxies | ⏳ dw#470, dw#210 |
+
+**Reference levels: N.** SEEA offers five candidate reference conditions and seven estimation methods
+(Table 5.9) and prescribes none. Every documented condition account uses **national data and a bespoke
+index** — Norway's Nature Index, South Africa's river Condition Index, Peru's BILBI/GDM, Mexico's
+Ecosystem Integrity Index (Table 23). None is reusable globally. Our default — **ecoregion × ET ambient
+percentiles** — is class **B**, chosen because it is one of only two methods tractable at global scale
+(the other being prescribed levels). This is the single least-standardised part of the biophysical work,
+and the reason reference levels must be inspectable and overridable ([#6](https://github.com/SchmidtDSE/unseea/issues/6)).
+
+Worth noting how much of this class is ①: GLOBIO, BII, SoilGrids, MODIS NPP / Copernicus DMP and the
+h3-derived C1 metrics are all named in the guidance. The **variables** are well-standardised even though
+the **reference levels** are not.
+
+## 4. Ecosystem services
+
+UNSD §6.4 models exactly ten services; those ten are our target ([#8](https://github.com/SchmidtDSE/unseea/issues/8)).
+
+| Service | Planned approach | Class | Evidence | Status |
+|---|---|---|---|---|
+| **Crop provisioning** | **SPAM** production × **FAOSTAT** year-adjustment → ecosystem contribution via **Vallecillo et al. 2019** (natural : natural+human inputs, energetic) | **①②** | §6.4.1.3 ¶217 — exactly ARIES's method. FAO **GAEZ v4** Theme 4 also named | ⏳ dw#501 |
+| **Wood provisioning** | FAO FRA / FAOSTAT harvest, spatially allocated by observed forest change | **①②** | §6.4.2.3 ¶235–237 | ⏳ dw#434 |
+| **Air filtration** | Deposition × concentration × vegetation cover (i-Tree / ESTIMAP logic); **SEDAC PM2.5** + LAI | **①** | §6.4.3, Table 14 | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| **Soil erosion control** | RUSLE family: retention = potential − actual loss | **①②** | §6.4.4.3 ¶261 — ARIES implements RUSLE (Martínez-López et al. 2019); InVEST SDR / LUCI add pixel→stream connectivity | ⏳ |
+| ↳ *via* **GloSEM** | import a published RUSLE output rather than routing in-app | **B** | Not named; methodologically aligned, but no connectivity term | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| **Water supply** | **Water abstraction** — not yield | **①** | SEEA EA ¶6.103; UNSD ¶266–268: "measurement focus … lies on estimating water abstraction". Flow regulation and purification are *inputs to* this service | ⏳ [#8](https://github.com/SchmidtDSE/unseea/issues/8) |
+| **Water purification** | InVEST NDR terrestrial N/P retention, distinguished from in-stream denitrification | **①** | §6.4.6.2 ¶286–287 | ⏳ |
+| ↳ *via* Global NEWS loading | | **B** | Not named | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| **Water flow regulation** | Baseflow / peak-flow attenuation over HydroSHEDS | **①** | Table 25 (InVEST, LUCI, ESTIMAP, Data4Nature) | ⏳ dw#442, dw#433 |
+| **Global climate regulation** | **IPCC Tier 1 stock-difference**: IPCC 2006 default densities stratified per **Ruesch & Gibbs (2008)** by land cover × ecofloristic region × continent × frontier forest × recent fire; soil carbon from **SoilGrids**. Plus the **removal flux** | **①②** | §6.4.8.3 ¶311–314 — the Tier structure follows the IPCC Guidelines; ¶314 describes ARIES's implementation | ⏳ [#21](https://github.com/SchmidtDSE/unseea/issues/21), dw#500 |
+| **Pollination** | InVEST/ESTIMAP pollinator abundance × **Klein et al. 2007** crop dependency | **①②** | §6.4.9.3 ¶329; Table 26. *Both models are index-based and explicitly not empirically validated* | ⏳ |
+| **Recreation** | **UNWTO** international-tourist statistics spatialized by an **ESTIMAP** landscape-attractiveness model; population proximity for local recreation | **①②** | §6.4.10.3 ¶343 — ARIES Explorer's actual Tier 1 | ⏳ [#19](https://github.com/SchmidtDSE/unseea/issues/19) |
+| ↳ *alt* Chaplin-Kramer NCP nature-access | | **B** | Not named | ⏳ |
+| Grazed biomass *(beyond the ten)* | **GLW 4** livestock density + forage | **②** | Table 25 credits ARIES | ⏳ dw#447 |
+
+Metric note: recreation's headline unit is **number of visits**; UNSD ¶348 observes visit *length* is
+arguably better but needs GPS data that raises privacy problems. Non-resident visits are recorded as
+**exports** (SEEA §7.2.6).
+
+**Replication targets** (Table 27): Netherlands (Horlings et al. 2019, 13 services), UK/ONS 2019, China
+(Ouyang et al. 2020), EU (Vallecillo/La Notte), Rwanda (Bagstad et al. 2019), South Africa (Turpie et al.
+2021), USA (Warnell et al. 2020).
+
+**ARIES platform ≠ ARIES for SEEA Explorer.** UNSD Table 25 credits the ARIES/k.LAB *platform* with
+eleven services — crop, grazed biomass, timber, NTFP (monetary only), water supply, global climate
+regulation, local climate (index), soil erosion control, flood mitigation, pollination, recreation. The
+*Explorer* exposes four to five. The gap we fill is the Explorer's **exposure and its lack of scenarios**,
+not a modelling deficit in ARIES.
+
+## 5. Monetary
+
+| Need | Class | Evidence |
 |---|---|---|
-| Exchange-value concept, resource rent, NPV | **①** | SEEA EA Ch.8–10 — the *method* is fully standardised |
-| FAOSTAT producer prices; World Bank commodity prices | **①** | Standard price sources |
-| **EXIOBASE** for resource rent / use tables / service trade | **B** | Not named in SEEA EA or the biophysical guidance (which is biophysical only). Check the **Monetary Valuation technical report** (#1) before concluding — it may well name MRIO. |
+| Exchange-value concept, resource rent, NPV | **①** | SEEA EA Ch.8–10 — the *method* is fully standardised, even where the inputs are not |
+| FAOSTAT producer prices · World Bank commodity prices | **①** | Standard price sources |
+| **EXIOBASE** — resource rent, use tables, service imports/exports | **B** | Not named in SEEA EA or the biophysical guidance (which is biophysical only). Check the **Monetary Valuation technical report** ([#1](https://github.com/SchmidtDSE/unseea/issues/1)) before concluding — it may well name MRIO |
 | **ESVD** value transfer | **B** | SEEA Ch.9.5 sanctions value transfer as a *method*; ESVD is not named as *the* database |
 | **ENCORE** dependency ratings | **N** | No SEEA standard for populating the use table's non-zero structure |
-| Carbon price | **N** | SEEA permits carbon markets *or* SCC "under appropriate assumptions" — deliberately unresolved. SEEALand's $25/tCO₂ is illustrative, not normative. |
-| Discount rate / asset life | **N** | SEEALand uses 2% real / 100 yr as an *example*. No prescribed value. |
+| Carbon price | **N** | SEEA permits carbon markets *or* SCC "under appropriate assumptions" — deliberately unresolved. SEEALand's $25/tCO₂ is illustrative |
+| Discount rate · asset life | **N** | SEEALand's 2% real / 100 yr is an example, not a prescription |
 
-**The monetary side is where "no standard exists" is most often the honest answer** — which is exactly
-why the assumptions panel and sensitivity ranges in #9 are not optional polish.
+The monetary side is where **N** is most often the honest answer — which is why the assumptions panel and
+sensitivity ranges in [#9](https://github.com/SchmidtDSE/unseea/issues/9) are not optional polish.
 
----
+## 6. Deviations to declare
 
-## 3. Where we knowingly deviate
+Each of these goes in the methods record ([#12](https://github.com/SchmidtDSE/unseea/issues/12)):
 
-Declare each of these in the methods record (#12):
+1. **Extent classification** — WTE as the wall-to-wall partition is our engineering answer to GET's overlapping indicative maps; endorsed as a crosswalk target, not as the reference classification.
+2. **Land cover** — where GLC_FCS30D is used instead of CCI LC, resolution is bought at the cost of comparability.
+3. **Reference levels** — ecoregion × ET ambient percentiles, where documented practice uses national indices.
+4. **Degradation attribution** — we drive degradation from *condition* change. UNSD ¶315 notes InVEST and ARIES drive carbon change almost entirely from *land-cover* change, handling only frontier forests. A genuine improvement, and a genuine divergence.
+5. **Erosion** — an imported RUSLE product (GloSEM) rather than a live SDR run, so no pixel→stream connectivity term.
+6. **Recreation** — if NCP nature-access is used instead of UNWTO × ESTIMAP.
+7. **Scale** — Tier 1 global inputs throughout, recorded per service and per variable.
 
-1. **Carbon**: `irrecoverable-carbon` instead of IPCC Tier 1 coefficients. **Fix** — implement the IPCC lookup (§1.1).
-2. **Water supply**: we framed this as runoff/water yield. SEEA ¶6.103 wants **water abstraction**. Yield is the *input* to the service, not the service. **Fix the framing**, or rename what we report.
-3. **Land cover**: GLC_FCS30D over CCI LC trades comparability for resolution (§1.2).
-4. **Extent classification**: WTE as the partition is our engineering solution to GET's overlap problem — endorsed as a crosswalk target, not as the reference classification.
-5. **Degradation attribution**: we drive degradation from *condition* change; InVEST and ARIES drive carbon change almost entirely from *land-cover* change. A genuine improvement, and a genuine divergence.
-6. **Recreation**: NCP nature-access instead of UNWTO × ESTIMAP.
-7. **Erosion**: GloSEM instead of a live RUSLE/SDR run — same equation family, no pixel→stream connectivity.
-
-## 4. Ingestible IUCN products
-
-To answer the question directly — what IUCN actually publishes that we can take:
+## 7. Ingestible IUCN products
 
 | Product | Ingestible? | Licence |
 |---|---|---|
-| **GET Level 3 (EFG) indicative maps v2.1** — [Zenodo 10081251](https://zenodo.org/records/10081251), raster GeoTIFF + GeoJSON, ~110 EFGs | ✅ **yes** — queued as data-workflows#438 | 🟢 CC-BY-4.0 |
-| **GET EFG descriptive profiles** — the typology text, assembly filters and diagnostics per group | ✅ yes — the reference for the crosswalk (#5) | 🟢 CC-BY-4.0 |
-| **IUCN Red List of Ecosystems** assessments | partly — assessment-level, incomplete global coverage; relevant to SEEA Ch.13 thematic accounts and maps onto the "Destroyed" condition descriptor | varies |
-| **IUCN habitat classification + Lumbierres 2021 crosswalk** | ✅ queued as data-workflows#427 | check |
-| **IUCN Red List species ranges** | 🔴 **no** — `NO` verdict, no redistribution incl. derivatives | 🔴 IUCN ToU |
+| **GET Level 3 (EFG) indicative maps v2.1** — [Zenodo 10081251](https://zenodo.org/records/10081251), ~110 EFGs, raster + vector | ✅ **yes** — dw#438 | 🟢 CC-BY-4.0 |
+| **GET EFG descriptive profiles** — typology text, assembly filters, diagnostics | ✅ yes — the crosswalk reference ([#5](https://github.com/SchmidtDSE/unseea/issues/5)) | 🟢 CC-BY-4.0 |
+| **IUCN Red List of Ecosystems** assessments | partly — assessment-level, incomplete global coverage. Relevant to Ch.13 thematic accounts; "ecosystem collapse" maps onto SEEA's "Destroyed" condition descriptor | varies |
+| **IUCN habitat classification + Lumbierres 2021 crosswalk** | ✅ dw#427 | check |
+| **IUCN Red List species ranges** | 🔴 **no** — no redistribution incl. derivatives | 🔴 IUCN ToU |
 
-So: **GET is the ingestible IUCN product, and it is already queued.** The Red List spatial data is the
-one that isn't, and that constraint is already recorded in the catalog's licence inventory.
+**GET is the ingestible IUCN product, and it is already queued.**
+
+---
+
+### Footnotes on layers we hold that are not the accounting choice
+
+- **`irrecoverable-carbon`** (Noon et al. 2022) is a conservation-prioritisation construct — carbon both *manageable* and *unrecoverable within 30 years* — so by design it is not a total accounting stock and cannot fill the global climate regulation row. Retain it as a **secondary/thematic** layer for targeting. The accounting path is the IPCC Tier 1 lookup above ([#21](https://github.com/SchmidtDSE/unseea/issues/21)).
+- **`nci-frontiers`** supplies crop, grazing and forestry *revenue densities*. Revenue is not the ecosystem contribution; it needs the Vallecillo/resource-rent step before it can enter an account. Useful as a cross-check on SPAM-derived values.
+- **`gfw-fishing-effort`** is fishing *effort*, not catch — a proxy for wild-fish provisioning, and 🟠 NC.
