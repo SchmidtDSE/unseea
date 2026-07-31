@@ -133,7 +133,36 @@ condition across them:
 
 Design consequence: reference levels must be an explicit, inspectable, user-overridable object in this
 app, not a hidden constant. This is where an agent earns its place — it can *explain* which reference
-condition was assumed and let the user change it.
+condition was assumed and let the user change it. See §5.3 for the sensitivity requirement this implies.
+
+#### ⚠️ Weight dilution: "present but not measured" silently reweights the index
+
+The index weights are not arbitrary. Checked against all six SEEALand ecosystem types, the rule is
+**one equal vote per ECT class *present*, then split equally among the variables inside that class.**
+Forest's abiotic ⅓ / biotic ½ / landscape ⅙ is just 2, 3 and 1 classes each taking ⅙.
+
+The load-bearing word is *present*. **SEEALand's urban area has no B3 functional variable, so its five
+classes are weighted 0.20 each rather than 0.167.** The consequence is a real methodological hazard:
+
+> An ECT class you cannot measure does not contribute zero — it contributes *nothing*, and every class
+> you **can** measure silently gains weight. Two analysts with different data coverage produce different
+> condition indices for the same ecosystem, in the same units, with no indication that they differ.
+
+This bites us hard, because our layer coverage is uneven by ECT class (§2.4 table vs `PROVENANCE.md` §3)
+and will stay uneven for some time. Two ecosystem types compiled from different numbers of ECT classes
+are **not comparable**, even though both indices are dimensionless and in [0,1].
+
+Design consequences, all mandatory:
+
+- Record **which ECT classes were populated** alongside every condition index, and surface it in the UI —
+  an index built from 3 of 6 classes must be visibly labelled as such.
+- **Never compare condition indices across ETs, areas or time points with different ECT coverage** without
+  restating both on the common subset of classes.
+- Offer **"recompute on the intersecting classes"** as a first-class operation whenever two condition
+  indices are placed side by side. This is the condition-account analogue of the density-vs-amount rule:
+  cheap to implement, and silently wrong if omitted.
+- The agent must state ECT coverage whenever it reports a condition index, exactly as it must state the
+  discount rate before reporting an asset value (§5.2).
 
 ### 2.5 Ecosystem services (Ch. 6–7, 9)
 
@@ -430,6 +459,45 @@ ecoregion × ET as the upper reference level) and **prescribed levels**. Both ar
 Store reference levels as a versioned lookup keyed by (ET, variable, source-of-reference), default to
 ecoregion-percentile, and let the user override. Never average condition across ETs with different
 reference conditions — the standard forbids it, and the agent must know that.
+
+#### Reference-level sensitivity is a headline feature, not a diagnostic
+
+Because no reference level is canonical, the honest product is not one number but **the response of the
+account to how the reference is defined.** Being fast and reproducible is what makes that possible, and it
+is a genuine differentiator: published compilations pick one reference basis and report it, because
+recompiling is expensive. For us recompiling is seconds (§10.1).
+
+Requirements:
+
+- Reference levels are a **first-class user input**, settable three ways: chosen from the versioned
+  defaults we ship, derived from a layer we have processed (ecoregion percentiles, reference sites), or
+  **supplied directly by the user** — including partners with better local knowledge than any global layer.
+- Every condition and monetary output carries the reference set that produced it, and any two results can
+  be diffed.
+- The UI should make **sweeping** a reference basis as easy as picking one, and show the account's
+  sensitivity to it.
+
+**One analytical result worth encoding, because it tells users which sensitivity actually matters.** Under
+the linear rescaling SEEALand uses, `indicator = (x − lower) / (upper − lower)`, so for two scenarios A
+and B measured on the same variable:
+
+```
+indicator_A − indicator_B = (x_A − x_B) / (upper − lower)
+```
+
+The difference is **invariant to where the reference is anchored** (`lower` cancels) and **scales inversely
+with the width of the reference range**. So:
+
+- Moving a reference level up or down changes every *level* but **cannot reorder two scenarios**.
+- Narrowing or widening the reference *range* rescales the magnitude of all differences — it changes how
+  big the gap looks, not its sign.
+- **Only a non-linear rescaling can reorder scenarios.** SEEA permits non-linear rescaling where the
+  ecological response is non-linear, so linear-vs-non-linear is the choice that genuinely carries
+  ranking risk, and it deserves far more prominence than nudging a bound.
+
+That is a much sharper thing to tell a user than "results are sensitive to reference levels", and it means
+scenario *comparisons* are considerably more robust than scenario *levels* — which is fortunate, because
+comparison is what decisions need.
 
 ### 5.4 Scale honesty
 
