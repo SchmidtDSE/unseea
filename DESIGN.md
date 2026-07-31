@@ -499,7 +499,87 @@ That is a much sharper thing to tell a user than "results are sensitive to refer
 scenario *comparisons* are considerably more robust than scenario *levels* — which is fortunate, because
 comparison is what decisions need.
 
-### 5.4 Scale honesty
+### 5.4 Scenarios are not accounts, and reference levels are not counterfactuals
+
+The most common way a partner will want to use this tool is to compare land-use options — a lower-impact
+production practice against a more intensive one. That is legitimate and well within SEEA's reach, but it
+requires keeping two things apart that are easily conflated:
+
+| | What it is | Where it lives | Status |
+|---|---|---|---|
+| **Reference level** | The [0,1] rescaling anchor. Defines what *good condition* means for an ecosystem type | Inside the condition account, stage 2b | ✅ **Explicitly sanctioned**, several bases permitted |
+| **Counterfactual baseline** | "Compared to what would otherwise have happened" | Outside the accounts entirely | ⚠️ **Not an accounting entry** |
+
+"Baseline" in ordinary speech usually means the second. In SEEA it is almost always the first — and the
+first is where the nuance a partner wants actually belongs.
+
+**What is compatible.** An account may use an *anthropogenic* reference level: for an agricultural
+ecosystem type, lower reference = the most degraded prevailing practice, upper = best attainable. A
+lower-impact system then scores high condition without anyone pretending it is primary forest. This is
+what SEEALand itself does for cropland — see the next subsection.
+
+**What is not.** Three hard walls, worth stating because partners will ask for all three:
+
+1. **"Avoided degradation" is not an accounting entry.** The monetary asset account's lines are opening,
+   enhancement, degradation, conversions, other volume changes, reappraisals, revaluations, closing.
+   There is **no avoided-loss line**. "Practice A prevented the conversion that would otherwise have
+   happened, so credit it with the averted damage" cannot be posted. The compatible way to answer the
+   same question is to compile **both scenarios' full accounts** and present the pair plus their
+   difference — the counterfactual then lives visibly in the framing rather than smuggled into a ledger.
+2. **No single landscape condition score.** Condition cannot be averaged across ecosystem types with
+   different reference conditions (§5.3). Results are reported per ET, always.
+3. **An account records an actual period.** Forward-looking comparison is an *application* of the
+   machinery, not an account. Label such outputs scenario projections. Cheap to honour, and it is the
+   difference between credible and not when a statistical agency reads the output.
+
+**The classification choice decides the accounting entry.** Whether a modified system is filed as the
+same ecosystem type in poorer condition, or as a *different* ecosystem type, determines whether the
+change posts as **degradation** or as **conversion** — same ecology, different ledger. This is a
+declarable methodological choice with large consequences, and the tool must surface it rather than bury
+it.
+
+#### Working lands: the standard already scores agricultural practice
+
+This is a stronger precedent than we expected, and it is the citation that makes working-lands
+applications defensible. SEEALand's own **cropland** condition variables are, verbatim:
+
+| ECT class | Cropland variable |
+|---|---|
+| A1 physical | Vegetation water content |
+| A2 chemical | Soil organic carbon |
+| B1 compositional | **Farmland bird species richness** |
+| B2 structural | **Crop diversity** · **Share of organic farming** |
+| B3 functional | Gross primary production |
+| C1 landscape | **Share of semi-natural vegetation** |
+
+The standard's own worked example scores agricultural condition using organic-farming share, crop
+diversity, farmland bird richness and semi-natural vegetation share, against an **anthropogenic**
+reference level. Distinguishing a lower-impact production system from an intensive one on canopy
+retention, native species presence and surrounding semi-natural cover is therefore **not a stretch of
+SEEA — it is the pattern SEEALand demonstrates**, applied to a different crop.
+
+Consequences for us:
+
+- Practice differentiation is a **data gap, not a framework gap**. What is missing is
+  practice-differentiated land cover and **practice-response coefficients** (practice → expected
+  condition-variable values). Nothing in the catalog supplies either; our layers are *observed
+  baselines*, not response functions.
+- Response coefficients are a **general gap class**, not an application detail — any scenario on any
+  managed system needs them. They belong on the roadmap as a first-class artifact type
+  ([`ARCHITECTURE.md`](ARCHITECTURE.md), parameter sets).
+- IUCN GET's T7 intensive-land-use biome (T7.1 annual croplands, T7.2 sown pastures, T7.3 plantations,
+  T7.4 urban/industrial, T7.5 derived semi-natural pastures) is the right home, and SEEA permits finer
+  national sub-classifications that crosswalk to GET. Sub-dividing T7.3 by practice is compatible.
+- Direct measurement — acoustic monitoring, eDNA — slots into **B1 compositional** with no framework
+  friction. SEEA is method-agnostic about how a variable is measured; it requires only that the variable
+  be rescaled against a declared reference. These measure the same construct as MSA, more directly.
+- The honest risk is not compatibility, it is that **anthropogenic reference levels for most production
+  systems do not exist and we would be inventing them.** Defensible if declared — the standard permits
+  prescribed levels and expert opinion — but it is where review will push hardest, and precisely why the
+  sensitivity sweep in §5.3 matters. Better to show a result holds across the plausible reference range
+  than to pick one and defend it.
+
+### 5.5 Scale honesty
 
 Global land cover at 100–300 m, hexed at the catalog's res-8 convention (~74 ha per BSU), cannot support a
 credible account for a 50-hectare farm. A defensible global EAA floor is nearer **50–100 km²** than the
@@ -511,7 +591,7 @@ UNSD's tier framework says the same thing in its own vocabulary: property-bounda
 **Tier 3**, and a global-data system is **Tier 1** — fit for "order of magnitude" estimates and
 "awareness raising", not parcel decisions. See [`DATA.md`](DATA.md) §1.
 
-### 5.5 Infrastructure: use the mirror, don't wait on the primary
+### 5.6 Infrastructure: use the mirror, don't wait on the primary
 
 The NRP Ceph object store behind `duckdb-mcp.nrp-nautilus.io` is not reliably available — it was fully
 down during scoping (2026-07-30) and still recovering the next day. **This is not a reason to block work**,
@@ -544,20 +624,84 @@ against it. Design consequences:
 
 ## 6. What the app does
 
-### 6.1 Architecture: config over the geo-agent runtime
+### 6.1 Architecture: config over the runtime, plus a versioned account library
 
-Fork `geo-agent-template`, following `landscape-frontiers`. Three files, no JavaScript:
+**See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the full treatment.**
+
+The `geo-agent-template` pattern stands: fork it, three files, no JavaScript.
 
 - **`layers-input.json`** — collections (GET, land cover, GLOBIO, carbon, WDPA, Overture, HydroBASINS,
   population), `draw_enabled: true`, `charts.enabled: true`, global view, welcome examples.
 - **`system-prompt.md`** — the SEEA framing the tools cannot supply: the five accounts, the ECT, the
   reference list, final-vs-intermediate discipline, aggregation rules (densities → AVG, stocks/areas →
-  SUM), the reference-level and valuation-assumption protocol, and the minimum-area guard.
+  SUM), the reference-level and valuation-assumption protocol, ECT-coverage disclosure (§2.4), and the
+  minimum-area guard.
 - **`k8s/`** — nginx + lab LLM proxy, per the standard two-target deploy (GitHub Pages BYO-key, or NRP).
 
+**One addition, and it is the only thing unseea contributes as machinery:** a **Python library
+implementing the five accounts behind a narrow API**, with a pluggable executor and an optional MCP
+endpoint. Nine calls — `connect`, `eaa`, and one per account — because SEEA fixed the surface for us.
+
+The API takes structured parameters and returns the account **plus the exact SQL it ran**:
+
+```python
+acct = eng.extent_account(eng.eaa(country="CR"), date=2019)
+acct.table   # the SEEA-shaped table       acct.checks       # reconciliation results
+acct.sql     # re-runnable in any DuckDB   acct.provenance   # bindings, parameters, ECT coverage, licences
+```
+
+> **SQL is not the interface. It is the returned artifact.**
+
+The reason is narrow and worth stating precisely, because it is easy to overstate. `geo-agent`'s chat
+export already gives **session reproducibility** — every `s3://` in an exported SQL block is rewritten to
+`https://s3-west.nrp-nautilus.io/…`, so it re-runs in any DuckDB with `httpfs` and no credentials. What
+it cannot give is **specification conformance**: nothing makes two sessions compile the *same* account,
+and the SEEALand fixture can only test a fixed definition. A statistical standard needs both properties,
+and returning `acct.sql` gets both rather than trading one for the other.
+
+The executor is where the runtime choice lives — the deployed `mcp-data-server`, a local DuckDB against
+NRP or source.coop, or a **fixture executor with no network at all**, which is what makes Phase 1
+testable before any layer is trusted.
+
+Everything else is reuse, deliberately:
+
+| Layer | Component | Owner |
+|---|---|---|
+| Data | `data-workflows` → the h3-stac catalog | upstream |
+| **Engine** | **`mcp-data-server`** — DuckDB, STAC grounding, H3, private routing, mirror failover | upstream |
+| App shell | `geo-agent` — map, chat, agent loop, reproducible export | upstream |
+| **Accounts** | **this repo** — SQL, manifests, bindings, parameter sets, vocabularies | unseea |
+| Applications | own bindings and parameter sets, private data by credential | separate repos |
+
+**The engine stays upstream.** `mcp-data-server` is deliberately domain-agnostic — its roadmap is engines
+and data types, not domain semantics — so SEEA logic is an unseea artifact and engine needs go upstream
+rather than into a fork. Serving the library as its *own* MCP endpoint is composition, not a fork, and is
+what makes the narrow API reachable from every client; it needs one small upstream change, since
+`geo-agent` takes a single `mcp_url` today. **Build the library first** — all the risk is in the API and
+the arithmetic, and neither needs a deployment to test.
+
+**We are testing this, not asserting it.** Two arms get built and scored in `geo-agent-benchmark`:
+**A**, the narrow API; **B**, worked SQL in the system prompt with the agent writing account SQL itself.
+Arm B is more flexible and more error-prone, and the gap should narrow as models improve — which is why
+it needs measuring. SEEALand gold sits at **L3** on that benchmark's provenance ladder by construction,
+matching a published professional source with tolerance. The property to watch is **run-to-run variance
+on identical questions**, which Arm B structurally cannot guarantee.
+
+Two rules carry the design:
+
+> **If an application requires a change to the account SQL, the abstraction is wrong.** Applications add
+> bindings, parameter sets, vocabularies and data.
+
+> **The agent selects and parameterizes account compilations. It does not author account arithmetic.**
+> Exploratory SQL stays fully available, as a visibly different class of work.
+
 Reference tables that must not drift — the GET↔land-cover crosswalk, reference levels, valuation
-coefficients — live as **versioned data in-repo or in the catalog**, not as prose in the system prompt.
-The agent reads them; it does not remember them.
+coefficients — are **versioned data artifacts**, in-repo or in the catalog, never prose in the system
+prompt. The agent reads them; it does not remember them.
+
+The validated SQL in §10 is the first draft of the account library, not a throwaway prototype. Prior art
+for the shape: `boettiger-lab/wyoming` carries a fixed reference analysis as `run_fixed_analysis.sql`,
+validated against an independent R implementation.
 
 ### 6.2 The interaction loop
 
@@ -598,6 +742,13 @@ just compiled — keeps the scenario internally consistent with the baseline, an
 
 ### 6.4 Where the runtime will fight us
 
+**Partly superseded by §6.1.** Arithmetic integrity largely dissolves once accounts come from versioned
+SQL rather than being re-derived per session: it becomes a property test on a fixed definition
+([`ARCHITECTURE.md`](ARCHITECTURE.md)), and the output schema is fixed by the standard. Two frictions
+survive and are worth pooling into one upstream ask: **XLSX export** (the chat export is excellent HTML,
+but statistical-office users need spreadsheets) and the **assumptions panel** — reactive parameters
+remain a real runtime gap, shared with landscape-frontiers' weight slider (geo-agent #147).
+
 - **Table-shaped output.** SEEA accounts are 2-D `entries × ET` tables with subtotals. The agent can
   emit markdown, which is probably adequate, but XLSX export is a hard requirement for statistical-office
   users and does not exist in the runtime today. Flag upstream.
@@ -620,10 +771,24 @@ be the performance risk the design assumed — `k` is nearly free, and EAA size 
 ~100 s gateway ceiling at continental scale. Full results, corrected SQL and the latency budget: §10.
 The NLCD two-year change matrix remains blocked on a second CONUS year (data-workflows#453).
 
-**Phase 1 — replicate SEEALand (weeks).** Reproduce the annex end to end — six ETs, one conversion,
-all five accounts, GEP $83,125 — as a fixture test with SEEALand's own numbers. This is the cheapest
-possible proof that our account arithmetic and NPV decomposition are correct, before any real data
-enters. It also becomes the regression test for the scenario engine, since SEEALand *is* a scenario.
+**Phase 1 — write the account library, with SEEALand as its spec (weeks).** Not "write a fixture test" —
+**write the library**, using the annex as the specification: six ETs, one conversion, all five accounts,
+GEP $83,125, forest ΔNPV −$116,366. Same work as the earlier framing, but the artifact is reusable rather
+than a test script.
+
+This is the phase where the seam gets fixed ([`ARCHITECTURE.md`](ARCHITECTURE.md)): the nine-call API,
+the executor split, the binding/parameter/vocabulary separation, licence propagation, and the three test
+tiers. SEEALand is the ideal spec precisely because it has **no data dependency** — the fixture executor
+needs no network, so the arithmetic and the NPV decomposition are forced correct before any layer is
+trusted. It then stays as the conformance test, and as the regression test for the scenario engine, since
+SEEALand *is* a scenario.
+
+Runs in parallel, and gates the design ([#28](https://github.com/SchmidtDSE/unseea/issues/28)): **build
+Arm B too** — the system-prompt-plus-worked-SQL variant — and score both in `geo-agent-benchmark`. If Arm
+B matches Arm A on accuracy *and* on run-to-run variance, the library is not earning its keep and we
+should say so. Tracked: library [#27](https://github.com/SchmidtDSE/unseea/issues/27), evaluation
+[#28](https://github.com/SchmidtDSE/unseea/issues/28), MCP endpoint
+[#29](https://github.com/SchmidtDSE/unseea/issues/29).
 
 **Phase 2 — CONUS vertical slice (weeks).** Annual NLCD gives real opening/closing extent today. Build
 the full five-account chain for a US watershed: extent + change matrix, condition using GLOBIO + gHM +
@@ -690,7 +855,7 @@ scope behind a gate we can see.
 ## 10. Appendix: Phase 0 — validated primitives, measured
 
 **Status: run and validated 2026-07-31** against the primary catalog (`s3-west.nrp-nautilus.io`), which
-had recovered from the outage described in §5.5. Tasks **A, C, D and E pass**. Task **B remains blocked**
+had recovered from the outage described in §5.6. Tasks **A, C, D and E pass**. Task **B remains blocked**
 on a second NLCD year (boettiger-lab/data-workflows#453) — it is the only Phase 0 task with a data
 dependency.
 
@@ -938,7 +1103,7 @@ By ET, the ordering is ecologically sensible, which is the real evidence the joi
 
 ⚠️ **Scale caveat.** MSA is res 8 (~0.46 km²) while the ET fractions are res 9. Each h8 cell's single MSA
 value is attributed to every ET present within it, so these per-ET figures carry the cell's mixed
-landscape, not the ET's own intactness. Real, and worth stating in the methods record — see §5.4.
+landscape, not the ET's own intactness. Real, and worth stating in the methods record — see §5.5.
 
 Per §5.3, report these per ET and **never average across them**: forest and cropland are scored against
 different reference conditions.

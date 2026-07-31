@@ -30,6 +30,7 @@ parallel with data acquisition rather than behind it.
 | Path | What |
 |---|---|
 | [`DESIGN.md`](DESIGN.md) | The design document: what SEEA EA is, how ARIES for SEEA compares, the hard problems, the interaction model, and a phased plan |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | **How the system is layered:** the account-compiler contract, the binding/parameter/vocabulary seam, licence and private-data policy, test tiers, and the rule deciding what belongs here versus in an application built on it |
 | [`DATA.md`](DATA.md) | Best-in-class data acquisition plan: UNSD Tier framework, per-account source selection, licence analysis, and how it lines up against the `data-workflows` tracker |
 | [`PROVENANCE.md`](PROVENANCE.md) | **The planned layer list, with justification:** for each layer, is it named in SEEA/UNSD guidance, used by ARIES, used in a published national account, or our own judgement — plus the roadmap issue tracking it |
 | [`research/seea-ea-reference.md`](research/seea-ea-reference.md) | Distilled controlled vocabularies and table structures from the standard — the source for `system-prompt.md` and the app's lookup tables |
