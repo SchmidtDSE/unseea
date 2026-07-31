@@ -231,7 +231,7 @@ Small, and each is generically useful beyond us:
 An application is a `geo-agent` app (`layers-input.json`, `system-prompt.md`, `k8s/`) plus its own
 bindings and parameter sets, pinning an `unseea` version.
 
-**Cocoa builds on [`boettiger-lab/cacao-demo`](https://github.com/boettiger-lab/cacao-demo)**, extending
+**Cocoa builds on [`SchmidtDSE/cacao-demo`](https://github.com/SchmidtDSE/cacao-demo)**, extending
 and replacing as needed. That app was an early framing of these ideas on the GLEN/geo-agent architecture
 — useful base layers, but without the machinery to walk a user through a SEEA analysis or produce the
 reports. It already has the deployment, the feedback loop and a Peru layer selection; a new repo would

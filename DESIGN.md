@@ -624,7 +624,7 @@ against it. Design consequences:
 
 ## 6. What the app does
 
-### 6.1 Architecture: config over the runtime, plus a versioned account library
+### 6.1 Architecture: config over the runtime, plus the account library
 
 **See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the full treatment.**
 
