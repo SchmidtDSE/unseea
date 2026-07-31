@@ -18,6 +18,10 @@ reduction, degradation, enhancement, revaluation.
 **Scoping.** No application code yet. Start with [`DESIGN.md`](DESIGN.md), then the roadmap in
 [**issue #20**](https://github.com/SchmidtDSE/unseea/issues/20).
 
+📖 **[Documentation site →](https://schmidtdse.github.io/unseea/)** — begins with a walkthrough of
+[**SEEALand**](https://schmidtdse.github.io/unseea/seealand.html), the standard's worked toy example,
+traced through all five accounts.
+
 Phases 1–2 need no new data ingest — deliberately, so the account-arithmetic correctness work runs in
 parallel with data acquisition rather than behind it.
 
