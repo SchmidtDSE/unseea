@@ -336,6 +336,11 @@ density is the mean forest fraction over a k-ring; fragmentation is the share of
 different class; landscape diversity is Shannon entropy over neighbourhood class fractions. All are
 single SQL window/aggregate expressions over data we already hold, at any k, for any AOI.
 
+**Measured, and the claim holds.** Forest area density over a country EAA runs in 3.4 s at `k=3` and
+5.8 s at `k=10`; increasing `k` from 1 to 40 multiplies row count by 700× but wall clock by only 9×
+(§10.2). The cost is the parquet scan, not the neighbourhood expansion — so the metric family really is
+close to free, and the practical limit is EAA size rather than `k` (§10.3).
+
 SEEA's own worked example leans on exactly these variables — SEEALand's forest condition decline is
 driven mostly by "a large decrease in forest area density, a proxy for forest connectivity". So the
 metric family that H3 makes cheap is the one the standard reaches for first. This is worth building
@@ -457,7 +462,8 @@ s3_scope    = 's3://public-land-cover'      -- per bucket; confines the endpoint
 disables the server default, which silently breaks any query mixing buckets.
 
 **Verified 2026-07-31:** the fractional-extent primitive returns byte-identical results from the mirror and
-from the primary. Design consequences:
+from the primary. The primary had recovered later that day, and the full Phase 0 run (§10) executed
+against it. Design consequences:
 
 - Phase 0 (#2) and everything downstream can proceed against the mirror.
 - The app should treat the mirror as a **first-class fallback**, not an emergency measure. Since a SEEA
@@ -538,10 +544,13 @@ just compiled — keeps the scenario internally consistent with the baseline, an
 
 ## 7. Plan
 
-**Phase 0 — validate the primitives (days).** Run the §10 prototype SQL once the object store is back:
-fractional extent account for a country EAA; GLOBIO condition rollup; an NLCD two-year change matrix
-for a CONUS basin. Establish the latency budget. Confirm `frac`-weighted areas reconcile against an
-independent country-area figure.
+**Phase 0 — validate the primitives (days). ✅ Done 2026-07-31, except the change matrix.** The extent,
+condition, landscape-metric and carbon primitives all run and reconcile; `frac`-weighted areas close to
+−0.2% against an independent country-area figure at Costa Rica scale and within −1.2% out to Brazil. Every
+account is interactive (3–10 s) for a country-sized EAA. The k-ring landscape metric turned out **not** to
+be the performance risk the design assumed — `k` is nearly free, and EAA size is what binds, with a hard
+~100 s gateway ceiling at continental scale. Full results, corrected SQL and the latency budget: §10.
+The NLCD two-year change matrix remains blocked on a second CONUS year (data-workflows#453).
 
 **Phase 1 — replicate SEEALand (weeks).** Reproduce the annex end to end — six ETs, one conversion,
 all five accounts, GEP $83,125 — as a fixture test with SEEALand's own numbers. This is the cheapest
@@ -609,28 +618,134 @@ scope behind a gate we can see.
 
 ---
 
-## 10. Appendix: Phase 0 prototype SQL
 
-**Not yet executed** — the object store was down during scoping (§5.5). These are written against schemas
-confirmed via `get_stac_details`, but treat them as unvalidated drafts: run them first, fix them, then
-record the latencies. Always re-read exact S3 paths from `get_stac_details` rather than trusting the
-paths inlined here.
+## 10. Appendix: Phase 0 — validated primitives, measured
 
-**A note on partition pruning.** Globbing `h0=*` across a global res-9 fractional layer is the expensive
-path, and the bucket LIST it requires is what was timing out. Constrain `h0` explicitly. Get the base
-cells for an AOI with:
+**Status: run and validated 2026-07-31** against the primary catalog (`s3-west.nrp-nautilus.io`), which
+had recovered from the outage described in §5.5. Tasks **A, C, D and E pass**. Task **B remains blocked**
+on a second NLCD year (boettiger-lab/data-workflows#453) — it is the only Phase 0 task with a data
+dependency.
+
+All timings below are wall-clock round trips through the MCP endpoint `duckdb-mcp.nrp-nautilus.io`,
+median of three runs unless stated. They include HTTP and S3 latency, so they are what a user would
+actually wait, not engine time.
+
+Always re-read exact S3 paths from `get_stac_details` rather than trusting the paths inlined here.
+
+### 10.1 Latency budget
+
+Costa Rica EAA (51,181 km², 2 `h0` partitions, 109,055 res-8 cells) — the reference "country-scale"
+accounting area.
+
+| Task | Query | Median | Notes |
+|---|---|---:|---|
+| A | Extent account, per-class area | **4.3 s** | 13 classes returned |
+| C1 | MSA condition indicator, whole EAA | **6.2 s** | both weightings in one query |
+| C2 | MSA condition indicator by ET | **6.5 s** | the form the account actually needs |
+| D | Landscape metrics, `k=3` | **3.4 s** | 404,240 focal cells, 15.0M unnest rows |
+| E | Carbon stock total | **3.8 s** | 763,385 res-9 cells |
+| E2 | Carbon by ET | **9.9 s** | res-9 ⋈ res-9 join, the most expensive of the five |
+
+**Every account is interactive at country scale.** Nothing here needs precomputation or a materialised
+cache for a Costa-Rica-sized EAA.
+
+### 10.2 The `k` decision
+
+**`k` is not the constraint the design feared.** Sweeping `k` over the Costa Rica EAA, with focal cells
+held constant at 404,240:
+
+| `k` | ring size | unnest rows | secs |
+|---:|---:|---:|---:|
+| 1 | 7 | 2.8M | 3.3 |
+| 3 | 37 | 15.0M | 3.4 |
+| 5 | 91 | 36.8M | 3.8 |
+| 10 | 331 | 133.8M | 5.8 |
+| 15 | 721 | 291.5M | 7.0 |
+| 20 | 1,261 | 509.7M | 10.1 |
+| 25 | 1,951 | 788.7M | 14.1 |
+| 30 | 2,791 | 1,128M | 19.9 |
+| 40 | 4,921 | 1,989M | 30.2 |
+
+Row count grows **700×** from `k=1` to `k=40`; wall clock grows **9×**. The `h3_grid_disk` unnest is
+cheap, and DuckDB's hash join over the neighbour table absorbs it well.
+
+**Decision: `k ≤ 10` for interactive use, `k = 3` as the default** for forest area density. `k = 10` at
+res 9 is a ~3.5 km neighbourhood radius, which is already generous for a landscape-context metric —
+we run out of ecological justification long before we run out of compute. Larger `k` stays available for
+offline or batch work up to the ceiling in §10.3.
+
+### 10.3 What actually binds: EAA size
+
+Holding `k = 3` and growing the accounting area:
+
+| EAA | land km² | `h0` parts | focal cells | A: extent | D: `k=3` |
+|---|---:|---:|---:|---:|---:|
+| Costa Rica | 51,181 | 2 | 404,240 | 4.7 s | 3.4 s |
+| Colombia | 1,138,460 | 4 | 8,768,300 | 5.6 s | 15.9 s |
+| Peru | 1,292,090 | 4 | 6,982,320 | 6.7 s | 14.0 s |
+| Brazil | 8,507,770 | 12 | 58,380,600 | 19.6 s | 85.3 s |
+
+Unnest rows alone do **not** predict cost: Brazil at `k=3` is 2,160M rows in 84 s, while Costa Rica at
+`k=40` is 1,989M rows in 30 s. The difference is the parquet scan across `h0` partitions. Isolating it on
+the Brazil EAA:
+
+| `k` | unnest rows | secs |
+|---:|---:|---:|
+| 1 | 409M | 24.7 |
+| 3 | 2,160M | 84.2 |
+| 6 | 7,414M | **fails at ~100 s** |
+
+⚠️ **There is a hard operational ceiling near 100 seconds** — the request dies with a truncated read,
+which is a gateway timeout rather than a query failure. Any account that might exceed it needs to be
+chunked by `h0` or precomputed, not merely optimised.
+
+**Design constraint, stated plainly.** Budget on `h0` partition count first and focal-cell count second;
+`k` is nearly free. Continental EAAs (Brazil, CONUS, the EU) are the case that needs a different
+execution strategy, and the scenario engine — which reruns landscape metrics on every edit — should
+restrict recomputation to the edited neighbourhood rather than the whole EAA.
+
+### 10.4 Two gotchas worth encoding in the system prompt
+
+**1. `ST_Area_Spheroid` reads coordinates as (lat, lon), not (lon, lat).** On this DuckDB spatial build it
+returns 5,323 km² for Costa Rica; wrapped in `ST_FlipCoordinates` it returns 51,181 km², which matches the
+official ~51,100 km². Verified independently against a 1°×1° box. Any reference-area computation must
+flip first, or every reconciliation silently "fails" by an order of magnitude.
+
+**2. A res-8 EAA overshoots the coastline badly — and the fractional layer self-corrects it.** The
+Overture countries hex for Costa Rica covers 80,891 km², 58% more than the country's 51,181 km². The
+entire excess comes back from the land-cover join as class 200 (open sea): 29,393 km². Excluding classes
+200, 80 and 0 recovers the true area to within 0.2%. **Do not "fix" the EAA by shrinking it** — the
+fraction layer already carries the correct land share of every coastal cell.
+
+### 10.5 Partition pruning
+
+Globbing `h0=*` across a global res-9 fractional layer is the expensive path, and the bucket LIST it
+requires is what was timing out during the outage. Constrain `h0` explicitly. Derive the base cells for an
+AOI from its bounding box:
 
 ```sql
-SELECT DISTINCT CAST(h3_latlng_to_cell(lat, lon, 0) AS BIGINT) AS h0
-FROM (VALUES (8.0,-83.0),(11.2,-85.9),(10.0,-84.0),(9.0,-82.6)) AS t(lat,lon);
+WITH c AS (
+  SELECT bbox FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries.parquet')
+  WHERE country = 'CR' AND class = 'land'
+),
+g AS (
+  SELECT bbox.xmin + (bbox.xmax - bbox.xmin) * i / 24.0 AS lon,
+         bbox.ymin + (bbox.ymax - bbox.ymin) * j / 24.0 AS lat
+  FROM c, range(0, 25) t(i), range(0, 25) u(j)
+)
+SELECT DISTINCT CAST(h3_latlng_to_cell(lat, lon, 0) AS BIGINT) AS h0 FROM g;
 -- Costa Rica → {578290339652042751, 578395892768309247}
 ```
 
-### A. Ecosystem extent account, single time point
+A bbox grid over-covers (corners land in the ocean), which costs extra scan but never drops data. That
+trade is correct: a missed `h0` silently truncates the account.
 
-Exact per-class area over an EAA, from fractional coverage. The `frac × cell_area` product is the
-primitive the whole extent account rests on — validate it by reconciling the total against an
-independent country-area figure.
+---
+
+### A. Ecosystem extent account, single time point ✅
+
+Exact per-class area over an EAA, from fractional coverage. The `frac × h3_cell_area()` product is the
+primitive the whole extent account rests on.
 
 ```sql
 WITH aoi AS (
@@ -646,16 +761,45 @@ SELECT f.lc_class,
 FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet') f
 SEMI JOIN aoi a ON f.h8 = a.h8
 WHERE f.h0 IN (578290339652042751, 578395892768309247)
-  AND f.lc_class NOT IN (0, 255, 200)   -- no-data, nodata sentinel, open sea
+  AND f.lc_class NOT IN (0, 200, 80, 255)   -- no-data, open sea, permanent water, nodata sentinel
 GROUP BY f.lc_class
 ORDER BY area_km2 DESC;
 ```
 
-### B. ET change matrix, two time points (CONUS, annual NLCD)
+**The acceptance test passes, at four EAA scales**, against the spheroid area of the country's own
+Overture land polygon (`ST_Area_Spheroid(ST_FlipCoordinates(geometry))`, §10.4):
+
+| EAA | computed km² | polygon km² | error |
+|---|---:|---:|---:|
+| Costa Rica | 51,078 | 51,181 | **−0.20%** |
+| Colombia | 1,132,660 | 1,138,460 | −0.51% |
+| Peru | 1,283,050 | 1,292,090 | −0.70% |
+| Brazil | 8,412,580 | 8,507,770 | −1.12% |
+
+The residual is the res-9 discretisation of the coastline and drifts with the coast-to-area ratio, as it
+should. **Areas close. Everything downstream is trustworthy.**
+
+**Fractions vs. mode — the composition argument.** Both totals close (mode gives 51,043 km², −0.27%),
+because coastal over- and under-counting cancels. Per class they do not:
+
+| class | fractional km² | mode km² | mode error |
+|---|---:|---:|---:|
+| 112 Closed forest, evergreen broadleaf | 22,836 | 23,902 | +4.7% |
+| 40 Cropland | 16,273 | 17,357 | +6.7% |
+| 122 Open forest, evergreen broadleaf | 2,610 | 1,580 | **−39.5%** |
+| 116 Closed forest, unknown | 802 | 275 | **−65.8%** |
+| 20 Shrubs | 348 | 147 | **−57.6%** |
+| 115 Closed forest, mixed | 15 | 1 | **−92.0%** |
+
+Mode systematically erases minority classes into whichever class dominates each cell. An extent account
+built on mode would show a plausible total and a badly wrong composition — and composition is the whole
+account. **Use `hex-fractions` for extent; use `hex` (mode) only for map styling.**
+
+### B. ET change matrix, two time points ⛔ blocked
 
 The pattern that unblocks the extent account's additions/reductions entries. Requires two NLCD years
-hexed; only 2024 is currently in the catalog, so this is the query that motivates ingest #1 globally and
-a second NLCD year for CONUS.
+hexed; only 2024 is in the catalog, so this motivates a second CONUS year
+(boettiger-lab/data-workflows#453) and global annual land cover (ingest #1).
 
 ```sql
 -- opening and closing dominant class per BSU, then the from→to matrix
@@ -672,40 +816,95 @@ ORDER BY area_km2 DESC;
 Diagonal (`et_open = et_close`) is unchanged area; off-diagonal cells populate managed/unmanaged
 expansion and reduction. Note this uses the **mode** asset, not fractions — a change matrix needs one
 class per BSU on both dates. Sub-cell fractional change is a harder problem; res 10 (~1.5 ha) keeps the
-mode assumption defensible for CONUS.
+mode assumption defensible for CONUS. Given task A's finding above, expect the mode assumption to distort
+minority-class transitions; quantify that before trusting the off-diagonal entries.
 
-### C. Condition indicator, GLOBIO MSA
+### C. Condition indicator, GLOBIO MSA ✅
 
-The happy case: MSA is already in [0,1] against an undisturbed reference, so the variable → indicator
-step is the identity and no reference-level lookup is needed. Note the reducer — MSA is a bounded
-intensity index, so **area-weighted mean, never sum**.
+MSA is already in [0,1] against an undisturbed reference, so the variable → indicator step is the
+identity and no reference-level lookup is needed. **MSA is a bounded intensity index: area-weighted mean,
+never sum.**
+
+The EAA's coastal overshoot matters here too. GLOBIO drops ocean cells, so the naive whole-cell weighting
+is close — but the defensible form weights by *land* area from the fraction layer:
 
 ```sql
-WITH aoi AS (SELECT DISTINCT h8 FROM … WHERE country = 'CR' AND class = 'land')
-SELECT ROUND(SUM(g.msa * h3_cell_area(g.h8, 'km^2')) / SUM(h3_cell_area(g.h8, 'km^2')), 4) AS msa_indicator,
-       ROUND(SUM(h3_cell_area(g.h8, 'km^2')), 1) AS area_km2
-FROM read_parquet('s3://public-globio/globio-msa-2015-overall/hex/h0=*/data_0.parquet') g
-SEMI JOIN aoi a ON g.h8 = a.h8
-WHERE g.h0 IN (…);
+WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+),
+lc AS (   -- ET area within each h8, from sub-cell fractions
+  SELECT h8, lc_class, SUM(frac * h3_cell_area(h9, 'km^2')) AS et_km2
+  FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND lc_class NOT IN (0, 200, 80, 255)
+  GROUP BY h8, lc_class
+)
+SELECT lc.lc_class,
+       ROUND(SUM(g.msa * lc.et_km2) / SUM(lc.et_km2), 4) AS msa_by_et,
+       ROUND(SUM(lc.et_km2), 1) AS et_area_km2
+FROM lc
+JOIN read_parquet('s3://public-globio/globio-msa-2015-overall/hex/h0=*/data_0.parquet') g
+  ON g.h8 = lc.h8 AND g.h0 IN (578290339652042751, 578395892768309247)
+SEMI JOIN aoi a ON lc.h8 = a.h8
+GROUP BY lc.lc_class
+ORDER BY et_area_km2 DESC;
 ```
 
-Break this out **by ET** (join to land cover on `h8`) to get the per-ET condition the account requires —
-and remember §5.3: do not then average across ETs.
+Costa Rica, whole EAA: **MSA = 0.4122** land-weighted (0.4157 naive). The land-weighted denominator,
+51,070 km², reconciles with task A's 51,078 km² — the 8 km² gap is cells where GLOBIO has no value.
 
-### D. Condition C1 landscape metrics — the differentiator
+By ET, the ordering is ecologically sensible, which is the real evidence the join is right:
+
+| ET | MSA | area km² |
+|---|---:|---:|
+| 112 Closed forest, evergreen broadleaf | 0.544 | 22,835 |
+| 90 Herbaceous wetland | 0.479 | 567 |
+| 116 Closed forest, unknown | 0.448 | 802 |
+| 126 Open forest, unknown | 0.345 | 6,225 |
+| 30 Herbaceous vegetation | 0.280 | 706 |
+| 40 Cropland | 0.266 | 16,273 |
+| 50 Urban / built-up | 0.241 | 660 |
+
+⚠️ **Scale caveat.** MSA is res 8 (~0.46 km²) while the ET fractions are res 9. Each h8 cell's single MSA
+value is attributed to every ET present within it, so these per-ET figures carry the cell's mixed
+landscape, not the ET's own intactness. Real, and worth stating in the methods record — see §5.4.
+
+Per §5.3, report these per ET and **never average across them**: forest and cropland are scored against
+different reference conditions.
+
+### D. Condition C1 landscape metrics ✅
 
 Forest area density over a k-ring, straight from hex land cover. This is the variable that carries
 SEEALand's forest condition decline, and the reason the scenario engine works.
 
+⚠️ **The draft of this query in earlier revisions was wrong**: it constrained `h0` but never joined the
+EAA, so it silently computed all of Central America (17.7M focal cells) instead of Costa Rica (404k).
+Constraining `h0` is a partition-pruning optimisation, **not** a spatial filter. The corrected form scores
+only cells inside the EAA while keeping the neighbour universe unclipped, so k-rings that cross the EAA
+boundary are not truncated:
+
 ```sql
-WITH forest AS (   -- forest fraction per BSU (LCCS closed+open forest classes)
-  SELECT h9, SUM(frac) AS forest_frac
-  FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet')
-  WHERE h0 IN (…) AND lc_class BETWEEN 111 AND 126
-  GROUP BY h9
+WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
 ),
-nbr AS (           -- k-ring neighbourhood of each cell
-  SELECT f.h9 AS focal, UNNEST(h3_grid_disk(f.h9, 3)) AS neighbour FROM forest f
+forest AS (            -- neighbour universe: NOT clipped to the EAA, so no edge truncation
+  SELECT h9, h8, SUM(frac) AS forest_frac
+  FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND lc_class BETWEEN 111 AND 126
+  GROUP BY h9, h8
+),
+focal AS (             -- but score only cells inside the EAA
+  SELECT f.h9, f.forest_frac FROM forest f SEMI JOIN aoi a ON f.h8 = a.h8
+),
+nbr AS (
+  SELECT f.h9 AS focal, UNNEST(h3_grid_disk(f.h9, 3)) AS neighbour FROM focal f
 )
 SELECT n.focal,
        AVG(COALESCE(f2.forest_frac, 0)) AS forest_area_density
@@ -713,21 +912,59 @@ FROM nbr n LEFT JOIN forest f2 ON f2.h9 = n.neighbour
 GROUP BY n.focal;
 ```
 
-Same shape gives fragmentation (share of neighbours in a different class) and landscape diversity
-(Shannon entropy over neighbourhood class fractions). **Validate the cost of this one carefully** — the
-`h3_grid_disk` unnest multiplies row count by the k-ring size (k=3 → 37×), so it is the most likely
-performance surprise in the whole design, and the k that stays interactive sets a real design constraint.
+Costa Rica, `k=3`: 404,240 forest cells, mean forest area density **0.724**, 41.6% of forest cells above
+0.9 (interior/core forest). Mean density falls monotonically with `k` — 0.748 at `k=1` to 0.632 at `k=40` —
+as the widening neighbourhood pulls in non-forest, which is exactly the behaviour a fragmentation metric
+should show.
 
-### E. Global climate regulation, physical
+Same shape gives fragmentation (share of neighbours in a different class) and landscape diversity
+(Shannon entropy over neighbourhood class fractions). Costs and the `k` decision: §10.2–10.3.
+
+### E. Global climate regulation, physical ✅
 
 Carbon stock (retention) over the EAA. `carbon` is a per-cell **total**, so `SUM` is correct here — the
-opposite of the MSA rule above, and the aggregation trap the system prompt must state explicitly.
+opposite of the MSA rule in C, and the aggregation trap the system prompt must state explicitly. The
+collection carries `h8` as a column, so no `h3_cell_to_parent` call is needed.
 
 ```sql
-SELECT ROUND(SUM(c.carbon) / 1e6, 2) AS mt_carbon
-FROM read_parquet('s3://public-carbon/…/hex/h0=*/data_0.parquet') c
-SEMI JOIN aoi a ON h3_cell_to_parent(c.h9, 8) = a.h8
-WHERE c.h0 IN (…);
+WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+)
+SELECT ROUND(SUM(c.carbon) / 1e6, 2) AS mt_irrecoverable_c
+FROM read_parquet('s3://public-carbon/irrecoverable-carbon-2024/hex/h0=*/data_0.parquet') c
+SEMI JOIN aoi a ON c.h8 = a.h8
+WHERE c.h0 IN (578290339652042751, 578395892768309247);
 ```
 
-The sequestration *flow* half of this service needs ingest #3.
+Costa Rica: **52.93 Mt C** irrecoverable (2024), over 763,385 res-9 cells.
+
+**The density-vs-amount discipline, demonstrated.** To break carbon out by ET, apportion the per-cell
+*total* by `frac` and then sum — the mirror image of task C, where an *intensity* is weighted by area and
+then averaged. Both layers are native res 9, so the join is exact:
+
+```sql
+SELECT f.lc_class,
+       ROUND(SUM(c.carbon * f.frac) / 1e6, 2) AS mt_carbon,
+       ROUND(SUM(c.carbon * f.frac)
+             / (SUM(f.frac * h3_cell_area(f.h9,'km^2')) * 100), 1) AS mgC_per_ha
+FROM f JOIN c ON c.h9 = f.h9 ... GROUP BY f.lc_class;
+```
+
+| ET | Mt C | Mg C/ha |
+|---|---:|---:|
+| 112 Closed forest, evergreen broadleaf | 36.76 | 16.1 |
+| 40 Cropland | 5.06 | 3.1 |
+| 126 Open forest, unknown | 3.82 | 6.1 |
+| 90 Herbaceous wetland | 2.15 | **37.6** |
+| 50 Urban / built-up | 0.09 | 1.4 |
+
+Wetland carries the highest density and cropland/urban the lowest, as expected. The per-ET total is
+51.4 Mt against the whole-cell 52.93 Mt; the 1.5 Mt difference is carbon sitting in the sea and water
+fractions of coastal cells, correctly excluded here and correctly included above.
+
+⚠️ Licence: irrecoverable-carbon is **CC BY-NC 4.0**, non-commercial only. See `PROVENANCE.md`.
+
+The sequestration *flow* half of this service still needs ingest #3.
