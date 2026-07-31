@@ -438,14 +438,33 @@ UNSD's tier framework says the same thing in its own vocabulary: property-bounda
 **Tier 3**, and a global-data system is **Tier 1** — fit for "order of magnitude" estimates and
 "awareness raising", not parcel decisions. See [`DATA.md`](DATA.md) §1.
 
-### 5.5 Infrastructure note
+### 5.5 Infrastructure: use the mirror, don't wait on the primary
 
-Live validation of the extent-account SQL is **pending**: the NRP Ceph object store behind
-`duckdb-mcp.nrp-nautilus.io` was returning `Timeout`/`Could not connect` on all bucket LIST and GET
-operations during this scoping session (2026-07-30). DuckDB compute and H3 functions verified working
-(`h3_cell_area`, `h3_latlng_to_cell` confirmed); only S3 access was down. The prototype queries in §10
-should be run as the first task once it recovers, since they establish the performance budget the whole
-interaction model assumes.
+The NRP Ceph object store behind `duckdb-mcp.nrp-nautilus.io` is not reliably available — it was fully
+down during scoping (2026-07-30) and still recovering the next day. **This is not a reason to block work**,
+because the catalog has a drop-in read mirror.
+
+**MinIO mirror** — `minio.carlboettiger.info`, same bucket names, same catalog structure, anonymous reads
+([failover guide](https://boettiger-lab.github.io/mcp-data-server/guide/mirror-failover.html)). Route a
+query to it by passing the endpoint plus a scope:
+
+```
+s3_endpoint = 'minio.carlboettiger.info'
+s3_scope    = 's3://public-land-cover'      -- per bucket; confines the endpoint to that prefix
+```
+
+⚠️ **Always pass `s3_scope`.** A bare `s3_endpoint` applies to *every* `s3://` path in the query and
+disables the server default, which silently breaks any query mixing buckets.
+
+**Verified 2026-07-31:** the fractional-extent primitive returns byte-identical results from the mirror and
+from the primary. Design consequences:
+
+- Phase 0 (#2) and everything downstream can proceed against the mirror.
+- The app should treat the mirror as a **first-class fallback**, not an emergency measure. Since a SEEA
+  account is a reconciling table, a partial read is worse than a failed one — an account that silently
+  omits a bucket still *looks* balanced. Prefer failing over to failing quietly.
+- Map layers (PMTiles, COGs) are fetched client-side, so a full failover also needs the host swapped in
+  `layers-input.json` — a separate change from the SQL path (#11).
 
 ---
 
