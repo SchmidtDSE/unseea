@@ -1,0 +1,65 @@
+Ecosystem Condition Variable Accounts,,,,,,,
+Forest,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Vegetation water content - NDWI,index (-1 to 1),0.31,0.29,-0.020000000000000018
+,,Chemical state,Soil organic carbon stock,tC/ha,100,95,-5
+,,,Foliar or litter nitrogen concentration,mg N / g dry weight,18,17,-1
+,Biotic characteristics,Compositional state,Tree species richness,number,6,5,-1
+,,Structural state,Tree cover,%,81,75,-6
+,,Functional state,Vegetation index - NDVI,index (-1 to 1),0.65,0.63,-0.020000000000000018
+,Landscape/seascape characteristics,,Forest area density,%,74,59,-15
+Lake,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Water clarity,m Secchi depth,5,5.5,0.5
+,,Chemical state,Nitrogen concentration,total N mg/l,1.1,0.9,-0.20000000000000007
+,,,Chlorophyll a concentration,ug/l,4.2,3.5,-0.7000000000000002
+,Biotic characteristics,Compositional state,Fish species richness,number,35,34,-1
+,,Structural state,Ratio between biomass of predatory fish and total fish,percentage,12.5,17,4.5
+,,Functional state,Biological oxygen demand,mg O2/l,2.5,2.4,-0.10000000000000009
+,Landscape/seascape characteristics,,Share of lake shoreline with natural vegetation,percentage,40,40,0
+Cropland,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Vegetation water content - NDWI,index (-1 to 1),-0.15,-0.13,0.01999999999999999
+,,Chemical state,Soil organic carbon,g SOC / kg,25.6,24.8,-0.8000000000000007
+,Biotic characteristics,Compositional state,Farmland bird species richness,Farmland bird index,71,70,-1
+,,Structural state,Crop diversity,Simpsons diversity index,0.43,0.48,0.04999999999999999
+,,,Share of organic farming,%,7.5,7.6,0.09999999999999964
+,,Functional state,Gross primary production,kg C/m2,0.92,0.94,0.019999999999999907
+,Landscape/seascape characteristics,,Share of semi-natural vegetation,%,5.1,4.9,-0.1999999999999993
+Urban area,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Imperviousness (soil sealed per area),%,55,57,2
+,,Chemical state,Nitrogen dioxide (NO2) concentration,ug/m3,10.5,12.3,1.8000000000000007
+,Biotic characteristics,Compositional state,Bird species richness,Number per sampling day,53,45,-8
+,,Structural state,Tree cover,%,31,30,-1
+,,Functional state,No variable selected,,,,
+,Landscape/seascape characteristics,,Landscape mosaic - share of dominant natural land types in the surrounding landscape,%,56,52,-4
+Wetland,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Duration of water inundation/saturation,% time,97,89,-8
+,,Chemical state,Nitrogen concentration,total N mg/l,0.89,0.99,0.09999999999999998
+,Biotic characteristics,Compositional state,Dragonfly and damselfly sepcies richness,number per sampling day,29,26,-3
+,,Structural state,Vegetation cover (native macrophytes),percentage area,30,31,1
+,,Functional state,Biological oxygen demand,mg O2/l,5.1,6.2,1.1000000000000005
+,Landscape/seascape characteristics,,Intensity of surrounding land use within a 50m buffer area,% area with low intensity land use,39,33,-6
+Seagrass,,,,,,,
+,SEEA Ecosystem Condition Typology Class,,Variable descriptor,Measurement unit,Variable values (observed),,
+,,,,,Opening,Closing,Change
+,(1) ,(2),(3),(4),(5),(6),(7)
+,Abiotic characteristics,Physical state,Water clarity - turbidity,NTU,35,30,-5
+,,,Average patch size,m2,18.5,13.9,-4.6
+,,Chemical state,Chlorophyll a concentration,ug/L,3.5,3.7,0.20000000000000018
+,Biotic characteristics,Compositional state,Fish species richness,Number of species per sampling event,3,2,-1
+,,Structural state,Seagrass shoot density,Number of shoots / m2,121,105,-16
+,,Functional state,Biological Oxygen Demand,mg/L,1.5,1.55,0.050000000000000044
+,Landscape/seascape characteristics,,Seagrass meadow cover,%,35,29,-6

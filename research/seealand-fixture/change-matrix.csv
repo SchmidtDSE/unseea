@@ -1,0 +1,10 @@
+Ecosystem type change matrix (ha),,,,,,,,,
+,,,Closing Extent,,,,,,Opening
+,,Ecosystem types,Forest,Lake,Cropland,Urban areas,Wetland,Seagrass,
+,Opening Extent,Forest,38,,2,,,,40
+,,Lake,,30,,,,,30
+,,Cropland,,,60,,,,60
+,,Urban areas,,,,50,,,50
+,,Wetland,,,,,20,,20
+,,Seagrass,,,,,,50,50
+,Closing,,38,30,62,50,20,50,250

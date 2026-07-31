@@ -27,7 +27,8 @@ A row can hold several. **①②③ together is as strong as this domain gets.**
 
 **Status** — ✅ in the catalog · ⏳ on the roadmap, with the issue that tracks it.
 
-Sources, both in [`research/`](research/): **SEEA EA (2021)** White Cover; **UNSD Guidelines on Biophysical
+Sources, all in [`research/`](research/): **SEEA EA (official 2024 ed., ST/ESA/STAT/SER.F/124)**; **UNSD Monetary
+Valuation of Ecosystem Services and Assets** (2022, 137 pp); **UNSD Guidelines on Biophysical
 Modelling (2022)** — Table 5 (land cover products), 10 (country extent practice), 13–18 (condition
 indicators per ECT class), 23 (country condition practice), 25 (ES platform capability), 26 (pollination
 dependence), 27 (country ES practice), 28 (major data sources), and §6.4.1–6.4.10 per service.
@@ -148,8 +149,8 @@ not a modelling deficit in ARIES.
 |---|---|---|
 | Exchange-value concept, resource rent, NPV | **①** | SEEA EA Ch.8–10 — the *method* is fully standardised, even where the inputs are not |
 | FAOSTAT producer prices · World Bank commodity prices | **①** | Standard price sources |
-| **EXIOBASE** — resource rent, use tables, service imports/exports | **B** | Not named in SEEA EA or the biophysical guidance (which is biophysical only). Check the **Monetary Valuation technical report** ([#1](https://github.com/SchmidtDSE/unseea/issues/1)) before concluding — it may well name MRIO |
-| **ESVD** value transfer | **B** | SEEA Ch.9.5 sanctions value transfer as a *method*; ESVD is not named as *the* database |
+| **EXIOBASE** — resource rent, use tables, service imports/exports | **B** *(confirmed)* | **Checked:** the Monetary Valuation report mentions EXIOBASE, MRIO, input-output and multi-regional **zero times** in 137 pages. No standard names an MRIO for this, so our pick is genuinely our own judgement — reasonable, and to be declared |
+| **ESVD** value transfer | **①** | The UNSD Monetary Valuation report devotes a worked section to it — *"Demonstrating the use of data from the ecosystem services literature: the Ecosystem Services Valuation Database example"* (p.110) — and builds its Table 1 of valuation approaches from SEEA EA + ESVD + **ISO 14008**. **EVRI** is named as a second such database |
 | **ENCORE** dependency ratings | **N** | No SEEA standard for populating the use table's non-zero structure |
 | Carbon price | **N** | SEEA permits carbon markets *or* SCC "under appropriate assumptions" — deliberately unresolved. SEEALand's $25/tCO₂ is illustrative |
 | Discount rate · asset life | **N** | SEEALand's 2% real / 100 yr is an example, not a prescription |

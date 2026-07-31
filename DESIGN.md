@@ -1,7 +1,7 @@
 # unseea — a UN SEEA-EA decision planning tool on the geo-agent runtime
 
 **Status:** scoping design document. No code yet.
-**Sources:** SEEA EA (2021) White Cover, 393 pp — full text extracted and quoted below; ARIES for SEEA
+**Sources:** SEEA EA, **official 2024 edition** (ST/ESA/STAT/SER.F/124, 443 pp) — full text extracted; ARIES for SEEA
 Explorer user guide; the GLEN STAC catalog (223 collections) as of 2026-07-30.
 
 ---
@@ -73,7 +73,7 @@ area-weighted approach makes results **scale-invariant**:
 
 > "an area-weighted approach has been used meaning that the overall index is invariant to whether the
 > data are collated at finer resolutions (e.g. pixels) or at larger resolutions (e.g. for the ecosystem
-> asset)." — SEEA EA, footnote 172
+> asset)." — SEEA EA (2024 official ed.), Annex I, Table AI.5, footnote c
 
 That footnote is a licence for exactly what GLEN does. An H3 tessellation with area-weighted
 aggregation and parent-index rollup is not an approximation of the SEEA spatial model; it *is* the SEEA
@@ -128,8 +128,8 @@ statistical distributions, paleo data, contemporary data, prescribed levels, or 
 Natural and anthropogenic ETs get *different* reference conditions, and the standard forbids averaging
 condition across them:
 
-> "An average measure of ecosystem condition across all ET has not been derived as this would imply
-> aggregation across different reference conditions and this is not recommended."
+> "An average measure of ecosystem condition across all ecosystem types has not been derived, as this
+> would imply aggregation across different reference conditions, which is not recommended."
 
 Design consequence: reference levels must be an explicit, inspectable, user-overridable object in this
 app, not a hidden constant. This is where an agent earns its place — it can *explain* which reference
@@ -578,7 +578,7 @@ scope behind a gate we can see.
 
 ## 9. Provenance
 
-- SEEA EA (2021) White Cover, 393 pp — `https://seea.un.org/sites/seea.un.org/files/documents/EA/seea_ea_white_cover_final.pdf`.
+- SEEA EA, **official 2024 edition** — ST/ESA/STAT/SER.F/124, 443 pp, `https://seea.un.org/sites/default/files/documents/EA/seea_ea_f124_web_12dec24.pdf` (the 2021 White Cover is also retained for reference).
   Structural detail, table layouts, the ES reference list, the ECT, and the SEEALand annex in this
   document are taken from the extracted full text; see [`research/`](research/).
 - SEEA EA methodology hub — `https://seea.un.org/en/methodology/ecosystem-accounting`

@@ -29,12 +29,12 @@ parallel with data acquisition rather than behind it.
 | [`DATA.md`](DATA.md) | Best-in-class data acquisition plan: UNSD Tier framework, per-account source selection, licence analysis, and how it lines up against the `data-workflows` tracker |
 | [`PROVENANCE.md`](PROVENANCE.md) | **The planned layer list, with justification:** for each layer, is it named in SEEA/UNSD guidance, used by ARIES, used in a published national account, or our own judgement — plus the roadmap issue tracking it |
 | [`research/seea-ea-reference.md`](research/seea-ea-reference.md) | Distilled controlled vocabularies and table structures from the standard — the source for `system-prompt.md` and the app's lookup tables |
-| [`research/`](research/) | The SEEA EA standard (393 pp) and the UNSD Guidelines on Biophysical Modelling (221 pp), as published plus text extractions |
+| [`research/`](research/) | Source documents: the SEEA EA standard (official 2024 ed.), UNSD Guidelines on Biophysical Modelling, UNSD Monetary Valuation technical report, and the official SEEA supplements — including the **SEEALand worked example as CSV test fixtures** |
 
 ## Why this stack
 
 SEEA builds accounts up from **basic spatial units** and states that its area-weighted aggregation is
-invariant to the resolution the data are collated at (footnote 172). An H3 tessellation with
+invariant to the resolution the data are collated at (SEEA EA (2024 official ed.), Annex I, Table AI.5, footnote c). An H3 tessellation with
 area-weighted rollup is therefore not an approximation of the SEEA spatial model — it is that model,
 implemented. Every account reduces to a `GROUP BY` over hex cells joined to an accounting area, which is
 what makes live scenario recomputation feasible at all.

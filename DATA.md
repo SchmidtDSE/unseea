@@ -49,12 +49,12 @@ Two further points from the guidance worth designing around:
 
 | Document | Why | Status |
 |---|---|---|
-| SEEA EA (2021) White Cover | The standard | ✅ in [`research/`](research/) |
+| SEEA EA — **official 2024 edition** (ST/ESA/STAT/SER.F/124) | The standard | ✅ in [`research/`](research/) |
 | **Guidelines on Biophysical Modelling for Ecosystem Accounting** (2022, 221 pp) | Recommended model + data source per service; Tier definitions; condition-indicator tables | ✅ obtained, in [`research/`](research/) |
 | **Supplemental tables** to the above ([seea.un.org](https://seea.un.org/content/supplemental-materials-and-tables-guidelines-biophysical-modelling)) — Tables 4, 5, 13–18, 25, 28, maintained as living documents | Table 28 = global data sources; 13–18 = condition indicators per ECT class; 25 = platform capability matrix | **TODO — fetch current versions** |
-| **Technical report on Monetary Valuation of Ecosystem Services and Assets** (interim) | The valuation half; needed for accounts 4 and 5 | **TODO** |
-| **SEEA ES Reference List Crosswalk** + **Ecosystem Services Logic Chains** (published with SEEA EA) | Official crosswalk to CICES and other lists; needed to reconcile ENCORE's 21 services and EXIOBASE sectors to SEEA's ~27 | **TODO** |
-| **SEEALand complementary spreadsheet** | Cell-level condition workings and NPV-by-ET sheets behind Annex Tables A.4/A.10 | **TODO — blocks Phase 1** |
+| **Technical report on Monetary Valuation of Ecosystem Services and Assets** (interim, 137 pp) | The valuation half; needed for accounts 4 and 5 | ✅ obtained |
+| **SEEA ES Reference List Crosswalk** + **Ecosystem Services Logic Chains** | Official crosswalk SEEA → CICES v5.1 / NESCS / IPBES / MA / TEEB (91 rows) | ✅ obtained, CSV in [`research/seea-supplements/`](research/seea-supplements/) |
+| **SEEALand complementary spreadsheet** | 15 sheets incl. the three-stage condition accounts and the full NPV decomposition | ✅ obtained, CSV fixtures in [`research/seealand-fixture/`](research/seealand-fixture/) |
 
 ---
 

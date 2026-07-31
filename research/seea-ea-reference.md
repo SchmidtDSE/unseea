@@ -1,10 +1,8 @@
 # SEEA EA reference extract
 
-Distilled from the SEEA Ecosystem Accounting (2021) White Cover, 393 pp. Sources in this directory:
-
-- `seea_ea_white_cover_final.pdf` — the standard as published by UNSD.
-- `seea-ea-fulltext.txt` — text extraction, `===PAGE n===` delimited (PDF page numbers, which run ~22
-  ahead of the printed page numbers used in the standard's own cross-references).
+Distilled from **SEEA Ecosystem Accounting, official published edition** — ST/ESA/STAT/SER.F/124, United
+Nations, 2024, 443 pp. See [`README.md`](README.md) for the full source list and the edition note (the
+2021 White Cover is also retained; content is stable but wording and numbering differ).
 
 This file holds the controlled vocabularies and table structures the app must conform to. It is the
 source for `system-prompt.md` and for the versioned lookup tables described in
@@ -32,7 +30,8 @@ accounts (biodiversity, carbon, ocean, urban); Ch. 14 covers derived indicators.
 - **EA** — ecosystem asset; a contiguous, *mutually exclusive (non-overlapping)* area of one ET.
 - **EAA** — ecosystem accounting area; the reporting boundary (country, state, river basin, PA).
 
-Scale invariance, footnote 172 — the licence for H3 aggregation:
+Scale invariance — the licence for H3 aggregation (2024 ed., Annex I, Table AI.5, footnote c;
+White Cover footnote 172):
 
 > "an area-weighted approach has been used meaning that the overall index is invariant to whether the
 > data are collated at finer resolutions (e.g. pixels) or at larger resolutions (e.g. for the ecosystem
@@ -117,8 +116,8 @@ Estimation methods and which reference conditions they support:
 
 **Prohibition:** do not average condition across ETs with different reference conditions —
 
-> "An average measure of ecosystem condition across all ET has not been derived as this would imply
-> aggregation across different reference conditions and this is not recommended."
+> "An average measure of ecosystem condition across all ecosystem types has not been derived, as this
+> would imply aggregation across different reference conditions, which is not recommended."
 
 ## 6. Reference list of selected ecosystem services (Table 6.3)
 
