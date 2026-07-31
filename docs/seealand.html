@@ -85,6 +85,54 @@
   .st-nums .v{font-size:.84rem; color:var(--ink-2); font-family:var(--mono); font-variant-numeric:tabular-nums}
   .st-nums .v b{color:var(--ink); font-weight:600}
   .st-nums .v.neg b{color:var(--rust)}
+
+  /* folding SQL blocks */
+  details.sql{border-top:1px solid var(--rule-2); background:var(--paper)}
+  details.sql > summary{
+    padding:10px 20px; cursor:pointer; list-style:none; display:flex; gap:10px; align-items:baseline;
+    font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600;
+  }
+  details.sql > summary::-webkit-details-marker{display:none}
+  details.sql > summary::before{content:"▸"; color:var(--accent); font-size:.85rem}
+  details.sql[open] > summary::before{content:"▾"}
+  details.sql > summary:hover{color:var(--ink)}
+  details.sql > summary .lat{
+    margin-left:auto; text-transform:none; letter-spacing:0; font-family:var(--mono); color:var(--accent);
+  }
+  details.sql .body{padding:0 20px 16px; display:flex; flex-direction:column; gap:10px}
+  details.sql pre{
+    margin:0; overflow-x:auto; background:var(--panel); border:1px solid var(--rule); border-radius:3px;
+    padding:13px 15px; font-family:var(--mono); font-size:.755rem; line-height:1.65;
+  }
+  details.sql code{font-family:inherit}
+  details.sql pre.formula{color:var(--ink-2); line-height:1.75; font-size:.74rem}
+  details.sql .note{font-size:.82rem; color:var(--ink-2); margin:0}
+  details.sql .note strong{color:var(--ink)}
+  .sqlk{color:var(--accent); font-weight:600}
+  .sqlc{color:var(--ink-3); font-style:italic}
+  .sqls{color:var(--rust)}
+
+  /* the six storylines */
+  .stories{display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:12px}
+  .story{border:1px solid var(--rule); border-radius:4px; padding:13px 15px; background:var(--panel);
+    display:flex; flex-direction:column; gap:6px}
+  .story .et{display:flex; align-items:center; gap:8px; font-size:.88rem; font-weight:650}
+  .story .et .sw{width:10px; height:10px; border-radius:2px; flex:none}
+  .story p{margin:0; font-size:.83rem; color:var(--ink-2)}
+  .story .delta{font-family:var(--mono); font-size:.74rem; font-variant-numeric:tabular-nums;
+    margin-top:auto; padding-top:4px}
+  .story .delta.up{color:var(--accent)}
+  .story .delta.down{color:var(--rust)}
+
+  /* closing findings */
+  .findings{display:flex; flex-direction:column; gap:16px}
+  .finding{border:1px solid var(--rule); border-left:2px solid var(--accent); border-radius:0 4px 4px 0;
+    background:var(--panel); padding:17px 20px}
+  .finding h3{margin:0 0 9px; font-size:1.04rem; font-weight:650; letter-spacing:-.005em}
+  .finding p{margin:0 0 10px; font-size:.9rem; color:var(--ink-2); max-width:74ch}
+  .finding p:last-child{margin-bottom:0}
+  .finding strong{color:var(--ink)}
+  .finding .scroll{margin:12px 0}
 </style>
 </head>
 <body>
@@ -137,9 +185,9 @@
   <!-- ============ THE LANDSCAPE ============ -->
   <section class="sec">
     <h2 class="serif">The landscape, and the one thing that happens to it</h2>
-    <p class="sub">Each square is 1 ha, drawn from the standard's own spreadsheet. Every number in every
-    account below traces back to these two grids — and the entire difference between them is two cells
-    at the bottom-left of the forest block.</p>
+    <p class="sub">Each square is 1 ha, drawn from the standard's own spreadsheet
+    (<a href="#sources">figures AI.1–AI.2, p. 371</a>). The whole extent account traces back to these two
+    grids, and the entire difference between them is two cells at the bottom-left of the forest block.</p>
 
     <div class="maps">
       <div class="mapbox">
@@ -156,9 +204,66 @@
 
     <div class="notice warn">
       <p><b>The conversion (outlined in rust):</b> 2 ha of forest becomes cropland. In the accounts this
-      is <i>one</i> managed reduction and <i>one</i> managed expansion — but it moves extent, condition,
-      service flows, GEP and asset value, and it does so through four different mechanisms. That
-      propagation is what the replication actually tests.</p>
+      is <i>one</i> managed reduction and <i>one</i> managed expansion — but for forest it moves extent,
+      condition, service flows, GEP and asset value through four different mechanisms. That propagation
+      is what the replication actually tests.</p>
+    </div>
+  </section>
+
+  <!-- ============ THE STORYLINES ============ -->
+  <section class="sec">
+    <h2 class="serif">Six storylines, not one</h2>
+    <p class="sub">A common misreading — and one an earlier draft of this page invited — is that the
+    2-hectare conversion drives every number in the accounts. It does not. The annex
+    (<a href="#sources">p. 370</a>) sets out a <i>changing ecological context</i> in which several
+    independent pressures act at once. The conversion drives the forest story; seagrass's
+    $163,946 of degradation has nothing to do with it.</p>
+
+    <div class="stories">
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--forest)"></span>Forest</div>
+        <p>Converted at the margin, and the remaining block suffers <strong>edge effects</strong> that
+        impair its ecological functioning. This is the one storyline the conversion causes.</p>
+        <span class="delta down">condition −0.0590</span>
+      </div>
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--lake)"></span>Lake</div>
+        <p>Long-term efforts to improve water quality pay off. The only ecosystem type that
+        <strong>improves</strong>, and the only one posting ecosystem enhancement.</p>
+        <span class="delta up">condition +0.0456</span>
+      </div>
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--crop)"></span>Cropland</div>
+        <p>Gains 2 ha from the conversion. Policies to improve cropland condition have
+        <strong>mixed outcomes</strong>, so its condition is nearly flat.</p>
+        <span class="delta up">condition +0.0034</span>
+      </div>
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--urban)"></span>Urban area</div>
+        <p><strong>Urban intensification</strong> drives a loss of green space within an unchanged
+        footprint — extent is static while condition falls.</p>
+        <span class="delta down">condition −0.0192</span>
+      </div>
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--wet)"></span>Wetland</div>
+        <p>Caught by the same <strong>general intensification of ecosystem use</strong> as forest,
+        without any change in its own extent.</p>
+        <span class="delta down">condition −0.0353</span>
+      </div>
+      <div class="story">
+        <div class="et"><span class="sw" style="background:var(--sea)"></span>Seagrass</div>
+        <p><strong>Sewerage overflow</strong> from the urban area. The worst condition decline in
+        SEEALand, and entirely unrelated to the land conversion.</p>
+        <span class="delta down">condition −0.0759</span>
+      </div>
+    </div>
+
+    <div class="notice">
+      <p><b>Prices move too, and for stated reasons.</b> Wood and wild fish prices rise on higher demand
+      plus tighter sustainability regulation constraining supply; the price of global climate regulation
+      rises to reflect increasing marginal damages from carbon release. These price changes are what
+      produce the revaluation entries in the asset account — and, as the closing section shows, they are
+      large enough to flip the sign of the headline number.</p>
     </div>
   </section>
 
@@ -178,7 +283,7 @@
           <div class="num serif">1</div>
           <div class="st-title">
             <h3>Ecosystem extent account</h3>
-            <span class="ch">SEEA EA Ch. 4 · Tables A.1–A.2</span>
+            <span class="ch">SEEA EA Ch. 4 · <a href="#sources">Annex I tables AI.2–AI.3, p. 372</a></span>
           </div>
         </div>
         <div class="lanes">
@@ -223,6 +328,29 @@
           <span class="v">Lake / Urban / Wetland / Seagrass <b>unchanged</b></span>
           <span class="v">Total <b>250 ha</b>, net change <b>0</b></span>
         </div>
+        <details class="sql">
+          <summary>SQL — the real-data equivalent<span class="lat">4.3 s · validated</span></summary>
+          <div class="body">
+<pre><code>WITH aoi AS (                       -- the ecosystem accounting area, as res-8 hexes
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+)
+SELECT f.lc_class,
+       ROUND(SUM(f.frac * h3_cell_area(f.h9, 'km^2')), 1) AS area_km2
+FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet') f
+SEMI JOIN aoi a ON f.h8 = a.h8
+WHERE f.h0 IN (578290339652042751, 578395892768309247)
+  AND f.lc_class NOT IN (0, 200, 80, 255)   -- no-data, open sea, water, sentinel
+GROUP BY f.lc_class
+ORDER BY area_km2 DESC;</code></pre>
+            <p class="note"><strong>frac × cell area is the primitive the whole account rests on.</strong>
+            Over Costa Rica it returns 51,078 km² against the country's own land polygon at 51,181 km² —
+            <strong>−0.20%</strong>. Constraining <code>h0</code> is partition pruning for speed; the
+            <code>SEMI JOIN</code> is what actually clips to the accounting area.</p>
+          </div>
+        </details>
       </article>
 
       <!-- 2 -->
@@ -231,7 +359,7 @@
           <div class="num serif">2</div>
           <div class="st-title">
             <h3>Ecosystem condition account — three stages, not one</h3>
-            <span class="ch">SEEA EA Ch. 5 · Tables A.3–A.5</span>
+            <span class="ch">SEEA EA Ch. 5 · <a href="#sources">Annex I tables AI.4a–AI.5, pp. 373–375</a></span>
           </div>
         </div>
         <div class="lanes">
@@ -283,6 +411,71 @@
           <span class="v neg">Seagrass <b>−0.0759</b></span>
           <span class="v">Cropland <b>+0.0034</b></span>
         </div>
+        <details class="sql">
+          <summary>SQL — B1 compositional condition, by ecosystem type<span class="lat">6.5 s · validated</span></summary>
+          <div class="body">
+<pre><code>WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+),
+lc AS (                             -- how much of each ET sits inside each res-8 cell
+  SELECT h8, lc_class, SUM(frac * h3_cell_area(h9, 'km^2')) AS et_km2
+  FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND lc_class NOT IN (0, 200, 80, 255)
+  GROUP BY h8, lc_class
+)
+SELECT lc.lc_class,
+       ROUND(SUM(g.msa * lc.et_km2) / SUM(lc.et_km2), 4) AS msa_by_et,
+       ROUND(SUM(lc.et_km2), 1) AS et_area_km2
+FROM lc
+JOIN read_parquet('s3://public-globio/globio-msa-2015-overall/hex/h0=*/data_0.parquet') g
+  ON g.h8 = lc.h8 AND g.h0 IN (578290339652042751, 578395892768309247)
+SEMI JOIN aoi a ON lc.h8 = a.h8
+GROUP BY lc.lc_class
+ORDER BY et_area_km2 DESC;</code></pre>
+            <p class="note"><strong>MSA is a bounded intensity, so this is an area-weighted mean, never
+            a sum.</strong> The result orders as ecology predicts — closed broadleaf forest 0.544,
+            cropland 0.266, urban 0.241 — which is the real evidence the join is right. MSA needs no
+            rescaling step: it already runs [0,1] against an undisturbed reference, so stage 2b is the
+            identity for this one variable.</p>
+          </div>
+        </details>
+        <details class="sql">
+          <summary>SQL — C1 landscape: forest area density over a k-ring<span class="lat">3.4 s · validated</span></summary>
+          <div class="body">
+<pre><code>WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+),
+forest AS (                         -- neighbour universe: NOT clipped, so k-rings aren't truncated
+  SELECT h9, h8, SUM(frac) AS forest_frac
+  FROM read_parquet('s3://public-land-cover/cgls-lc100-2019/hex-fractions/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND lc_class BETWEEN 111 AND 126
+  GROUP BY h9, h8
+),
+focal AS (                          -- but score only the cells inside the accounting area
+  SELECT f.h9 FROM forest f SEMI JOIN aoi a ON f.h8 = a.h8
+),
+nbr AS (
+  SELECT f.h9 AS focal, UNNEST(h3_grid_disk(f.h9, 3)) AS neighbour FROM focal f
+)
+SELECT n.focal,
+       AVG(COALESCE(f2.forest_frac, 0)) AS forest_area_density
+FROM nbr n LEFT JOIN forest f2 ON f2.h9 = n.neighbour
+GROUP BY n.focal;</code></pre>
+            <p class="note"><strong>This is the variable that carries SEEALand's forest decline</strong> —
+            74% → 59% in the annex. On an H3 grid the metric that normally needs dedicated raster tooling
+            is one <code>UNNEST</code>. Measured: 404,240 focal cells at k=3 in 3.4 s; raising k from 1 to
+            40 multiplies rows by 700× but wall clock by only 9×, so the neighbourhood radius is
+            effectively free and EAA size is what binds.</p>
+          </div>
+        </details>
       </article>
 
       <!-- 3 -->
@@ -291,7 +484,7 @@
           <div class="num serif">3</div>
           <div class="st-title">
             <h3>Ecosystem services flows, in physical terms</h3>
-            <span class="ch">SEEA EA Ch. 6–7 · Table A.6</span>
+            <span class="ch">SEEA EA Ch. 6–7 · <a href="#sources">Annex I tables AI.6–AI.7, pp. 377–378</a></span>
           </div>
         </div>
         <div class="lanes">
@@ -337,6 +530,29 @@
           <span class="v">Water purification <b>7 t N</b></span>
           <span class="v">Recreation <b>9,800 visits</b></span>
         </div>
+        <details class="sql">
+          <summary>SQL — the one service we can compute today: carbon retention<span class="lat">3.8 s · validated</span></summary>
+          <div class="body">
+<pre><code>WITH aoi AS (
+  SELECT DISTINCT h8
+  FROM read_parquet('s3://public-overturemaps/2026-02-18.0/countries/hex/h0=*/data_0.parquet')
+  WHERE h0 IN (578290339652042751, 578395892768309247)
+    AND country = 'CR' AND class = 'land'
+)
+SELECT ROUND(SUM(c.carbon) / 1e6, 2) AS mt_irrecoverable_c
+FROM read_parquet('s3://public-carbon/irrecoverable-carbon-2024/hex/h0=*/data_0.parquet') c
+SEMI JOIN aoi a ON c.h8 = a.h8
+WHERE c.h0 IN (578290339652042751, 578395892768309247);</code></pre>
+            <p class="note"><strong>SUM is correct here, and it is the exact opposite of the MSA rule
+            above.</strong> <code>carbon</code> is a per-cell total (an amount), so it sums; MSA is a
+            per-cell intensity, so it averages. The two look identical in SQL and produce silently wrong
+            accounts if swapped. Costa Rica: 52.93 Mt C irrecoverable, 2024.</p>
+            <p class="note">To split it by ecosystem type you apportion the <i>amount</i> by
+            <code>frac</code> and then sum — the mirror image of weighting an <i>intensity</i> by area
+            and then averaging. Both layers are native res 9, so that join is exact. The rest of the
+            service list needs the biophysical logic chains and is not yet computable.</p>
+          </div>
+        </details>
       </article>
 
       <!-- 4 -->
@@ -345,7 +561,7 @@
           <div class="num serif">4</div>
           <div class="st-title">
             <h3>Monetary services account, and Gross Ecosystem Product</h3>
-            <span class="ch">SEEA EA Ch. 8–9 · Table A.7</span>
+            <span class="ch">SEEA EA Ch. 8–9 · <a href="#sources">Annex I tables AI.8–AI.9, pp. 379–380</a></span>
           </div>
         </div>
         <div class="lanes">
@@ -391,6 +607,19 @@
           <span class="v">Seagrass <b>$12,350</b></span>
           <span class="v">GEP <b>$83,125</b></span>
         </div>
+        <details class="sql">
+          <summary>No SQL — and that is the point<span class="lat">arithmetic, not a query</span></summary>
+          <div class="body">
+            <p class="note">Stages 4 and 5 are <strong>price × quantity and a discount factor</strong>.
+            There is no spatial data to query: once stage 3 has produced physical flows per ecosystem
+            type, the monetary accounts are ordinary arithmetic over a small table.</p>
+            <p class="note">That is exactly why <strong>Phase 1 is blocked on nothing</strong>. We can
+            implement and test the entire monetary half of the standard against SEEALand's own numbers
+            without a single catalog layer — and the prices, discount rate and asset life become visible
+            controls in the app rather than buried constants, because the standard itself treats them as
+            illustrative rather than prescribed.</p>
+          </div>
+        </details>
       </article>
 
       <!-- 5 -->
@@ -399,7 +628,7 @@
           <div class="num serif">5</div>
           <div class="st-title">
             <h3>Monetary ecosystem asset account</h3>
-            <span class="ch">SEEA EA Ch. 10–11 · Tables A.8–A.11</span>
+            <span class="ch">SEEA EA Ch. 10–11 · <a href="#sources">Annex I tables AI.10–AI.11, pp. 381, 383</a></span>
           </div>
         </div>
         <div class="lanes">
@@ -447,6 +676,37 @@
           <span class="v neg">+ volume <b>−$108,111</b></span>
           <span class="v">+ price <b>+$35,180</b></span>
         </div>
+        <details class="sql">
+          <summary>The decomposition, as arithmetic<span class="lat">SEEA EA appendix A10.1</span></summary>
+          <div class="body">
+<pre class="formula">NPV factorises exactly into three terms, per ecosystem type and service:
+
+    Q = expected annual flow × asset life        a = area, hectares
+    q = Q / a      quantity per hectare          p = NPV / Q, implied unit price
+
+    NPV = a · q · p
+
+The change is split symmetrically across the three factors — the Shapley
+decomposition of a product — so the parts sum exactly to the whole, with
+no residual left over to dump somewhere:
+
+    area   = (a₁−a₀) · ( (q₀p₀ + q₁p₁)/3 + (q₀p₁ + q₁p₀)/6 )   → CONVERSION
+    volume = (q₁−q₀) · ( (a₀p₀ + a₁p₁)/3 + (a₀p₁ + a₁p₀)/6 )   → DEGRADATION / ENHANCEMENT
+    price  = (p₁−p₀) · ( (a₀q₀ + a₁q₁)/3 + (a₀q₁ + a₁q₀)/6 )   → REVALUATION
+
+Forest, all three services summed:
+
+    −43,435  +  −108,111  +  +35,180  =  −116,366</pre>
+            <p class="note"><strong>This decomposition is the load-bearing idea of the whole standard.</strong>
+            Without it you have a single number for the change in asset value and no way to post it: a
+            conversion, a degradation and a price rise are three different accounting entries that happen
+            to sum to the same total, and only one of them is something a policy did.</p>
+            <p class="note">The symmetric form matters — a naive
+            <code>p0·q0·(a1−a0)</code> style split leaves a residual that has to be dumped somewhere. These
+            formulae reproduce the annex's forest figures to machine precision, verified against
+            <code>npv-decomposition.csv</code>.</p>
+          </div>
+        </details>
       </article>
 
     </div>
@@ -530,6 +790,129 @@
     </div>
   </section>
 
+  <!-- ============ THE UPSHOT ============ -->
+  <section class="sec">
+    <h2 class="serif">So what is the assessment actually telling us?</h2>
+    <p class="sub">Two hectares of forest became cropland. Here is what the five accounts, read together,
+    say about that — and none of it is visible from any single account on its own.</p>
+
+    <div class="findings">
+
+      <div class="finding">
+        <h3>1. The damage is wildly disproportionate to the area lost</h3>
+        <p>You removed <strong>5%</strong> of the forest — 2 hectares of 40. Look at what follows from it:</p>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Measure</th><th class="n">Opening</th><th class="n">Closing</th><th class="n">Change</th></tr></thead>
+            <tbody>
+              <tr><td>Forest area</td><td class="n">40 ha</td><td class="n">38 ha</td><td class="n neg">−5%</td></tr>
+              <tr><td>Forest area density</td><td class="n">74%</td><td class="n">59%</td><td class="n neg">−15 pp</td></tr>
+              <tr><td>Expected wood provisioning</td><td class="n">150 m³</td><td class="n">120 m³</td><td class="n neg">−20%</td></tr>
+              <tr><td>Expected climate regulation</td><td class="n">160 tCO₂</td><td class="n">125 tCO₂</td><td class="n neg">−22%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The conversion cut <i>into</i> the block rather than shaving its edge, creating disproportionate
+        perimeter. Forest area density is the single largest contributing variable to the condition
+        decline — −0.025 of the −0.059 total. <strong>Nothing else in the account would have caught
+        this</strong>, which is precisely why the C1 landscape class earns its place.</p>
+      </div>
+
+      <div class="finding">
+        <h3>2. "Net zero hectares" hides a real loss</h3>
+        <p>The extent account records net change in extent: <strong>zero</strong>. Two hectares left
+        forest, two hectares joined cropland. But forest is worth <strong>$22,627/ha</strong> and cropland
+        <strong>$8,081/ha</strong>, so the swap moves land from a high-value asset class to a low-value one:</p>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Conversion entry</th><th class="n">Value</th></tr></thead>
+            <tbody>
+              <tr><td>Cropland gains (addition)</td><td class="n">+$16,944</td></tr>
+              <tr><td>Forest loses (reduction)</td><td class="n neg">−$43,435</td></tr>
+              <tr class="tot"><td>Net effect of the conversion</td><td class="n neg">−$26,491</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>And that is before the <strong>−$108,111</strong> of forest degradation the edge effect helped
+        cause. An area-only account would have called this a wash.</p>
+      </div>
+
+      <div class="finding">
+        <h3>3. The headline number went up while nature got worse</h3>
+        <p>Total asset value rose <strong>+$51,244</strong>. Split by what actually happened:</p>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Component</th><th class="n">Value</th></tr></thead>
+            <tbody>
+              <tr><td>Degradation</td><td class="n neg">−273,156</td></tr>
+              <tr><td>Enhancement</td><td class="n">+15,300</td></tr>
+              <tr><td>Conversions, net</td><td class="n neg">−26,491</td></tr>
+              <tr class="tot"><td>Physical change in natural capital</td><td class="n neg">−284,347</td></tr>
+              <tr><td>Revaluation (prices rose)</td><td class="n">+244,789</td></tr>
+              <tr><td>Upward reappraisals</td><td class="n">+90,802</td></tr>
+              <tr class="tot"><td>Price and expectation change</td><td class="n">+335,591</td></tr>
+              <tr class="tot"><td>Net change in value</td><td class="n">+51,244</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Natural capital physically fell by $284,347. The balance sheet rose only because carbon
+        and timber became more valuable.</strong> Anyone reporting a single "natural capital value" would
+        have announced good news. This is the strongest argument for the standard's structure: it makes it
+        structurally impossible to book a price rise as an environmental improvement.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ POLICY ============ -->
+  <section class="sec">
+    <h2 class="serif">How this informs scenarios and policy</h2>
+    <p class="sub">The reason to compute accounts rather than indicators is that accounts tell you which
+    lever moved — and therefore which lever to pull.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h4>Siting beats quantity</h4>
+        <p>Because the damage tracks configuration rather than area, the same 2 ha taken from a forest edge
+        versus punched into the interior give materially different outcomes. A scenario engine can rank
+        alternative sitings of an identical development — the actionable lever, and one that falls straight
+        out of the k-ring metric.</p>
+      </div>
+      <div class="card">
+        <h4>Flow and stock fail differently</h4>
+        <p>GEP is an annual flow; the asset account is a stock. You can raise this year's GEP by harvesting
+        more timber while depleting the asset that produces it. Only holding both catches that, which is
+        why the standard refuses to collapse them into one indicator.</p>
+      </div>
+      <div class="card">
+        <h4>Two bad arguments get blocked</h4>
+        <p>"We lost 2 ha of forest but gained 2 ha of cropland, so it's a wash" — no: −$26,491 before
+        induced degradation. And "natural capital is up this year" — no: that was carbon prices.</p>
+      </div>
+      <div class="card flag">
+        <h4>Where the credibility actually sits</h4>
+        <p>The money moves through the volume effect, and the volume effect <i>is</i> condition. So all of
+        this rests on the account with no agreed reference levels and the thinnest data. That is the honest
+        weak point, and it is where the work should go.</p>
+      </div>
+    </div>
+
+    <div class="notice">
+      <p><b>The decomposition names the instrument.</b> Each effect corresponds to a different kind of
+      policy, which is why posting them separately is not bookkeeping pedantry:</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Effect</th><th>Accounting entry</th><th>Policy lever</th></tr></thead>
+        <tbody>
+          <tr><td>Area</td><td>Ecosystem conversion</td><td>Zoning, land-use planning</td></tr>
+          <tr><td>Volume</td><td>Degradation / enhancement</td><td>Management practice, restoration</td></tr>
+          <tr><td>Price</td><td>Revaluation</td><td><strong>Not a lever</strong> — do not take credit for it</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- ============ SCENARIO ============ -->
   <section class="sec">
     <h2 class="serif">Why this doubles as the scenario engine's test</h2>
@@ -544,9 +927,50 @@
     </div>
   </section>
 
+  <!-- ============ SOURCES ============ -->
+  <section class="sec" id="sources">
+    <h2 class="serif">Read the original</h2>
+    <p class="sub">SEEALand is <b>Annex I</b> of the standard —
+    <i>"SEEALand – a stylized example of ecosystem accounting"</i>, <strong>pp. 369–383</strong>
+    of <a href="https://seea.un.org/ecosystem-accounting">System of Environmental-Economic Accounting —
+    Ecosystem Accounting</a> (United Nations, 2024 official edition, ST/ESA/STAT/SER.F/124). The
+    complementary spreadsheet with the per-variable workings is published alongside it on the same page.</p>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Page</th><th>Table / figure</th><th>What it holds</th></tr></thead>
+        <tbody>
+          <tr><td class="n">369–370</td><td>—</td><td>Background, and the general ecological context: the six storylines</td></tr>
+          <tr><td class="n">370</td><td>Table AI.1</td><td>The six ecosystem types, with their IUCN GET codes</td></tr>
+          <tr><td class="n">371</td><td>Figures AI.1–AI.2</td><td>Opening and closing extent maps — the two hectare grids at the top of this page</td></tr>
+          <tr><td class="n">372</td><td>Tables AI.2–AI.3</td><td>Extent account, and the ecosystem type change matrix</td></tr>
+          <tr><td class="n">373</td><td>Table AI.4a</td><td>Condition <i>variable</i> account for forest — stage 2a</td></tr>
+          <tr><td class="n">374</td><td>Tables AI.4b–AI.4c</td><td>Condition <i>indicator</i> and <i>index</i> accounts for forest — stages 2b and 2c</td></tr>
+          <tr><td class="n">375</td><td>Table AI.5</td><td>Condition indices for all six ecosystem types</td></tr>
+          <tr><td class="n">377–378</td><td>Tables AI.6–AI.7</td><td>Physical supply-and-use tables</td></tr>
+          <tr><td class="n">379–380</td><td>Tables AI.8–AI.9</td><td>Monetary supply-and-use tables — GEP appears as total supply</td></tr>
+          <tr><td class="n">381</td><td>Table AI.10</td><td>NPV calculation for forest</td></tr>
+          <tr><td class="n">383</td><td>Table AI.11</td><td>Monetary ecosystem asset account — the closing reconciliation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notice">
+      <p><b>In this repository.</b> A copy of the standard is at
+      <a href="https://github.com/SchmidtDSE/unseea/blob/main/research/seea_ea_final_2024.pdf"><span class="mono">research/seea_ea_final_2024.pdf</span></a>
+      (Annex I begins on PDF page 402), with a searchable plain-text extraction at
+      <a href="https://github.com/SchmidtDSE/unseea/blob/main/research/seea-ea-2024-fulltext.txt"><span class="mono">research/seea-ea-2024-fulltext.txt</span></a>
+      from line 21076. The complementary spreadsheet is extracted to CSV in
+      <a href="https://github.com/SchmidtDSE/unseea/tree/main/research/seealand-fixture"><span class="mono">research/seealand-fixture/</span></a>
+      — 15 sheets, and the source of every figure quoted on this page. Our distilled summary is
+      <a href="https://github.com/SchmidtDSE/unseea/blob/main/research/seea-ea-reference.md"><span class="mono">research/seea-ea-reference.md</span></a> §9.</p>
+    </div>
+  </section>
+
   <div class="foot">
-    <span>Source: <a href="https://github.com/SchmidtDSE/unseea/tree/main/research/seealand-fixture">research/seealand-fixture/*.csv</a> — 15 sheets, verified</span>
-    <span>SEEA EA 2024, ST/ESA/STAT/SER.F/124, Annex</span>
+    <span>SEEA EA 2024, ST/ESA/STAT/SER.F/124, Annex I, pp. 369–383</span>
+    <span>Figures verified against <a href="https://github.com/SchmidtDSE/unseea/tree/main/research/seealand-fixture">research/seealand-fixture/*.csv</a></span>
+    <span>SQL validated 2026-07-31; latencies per <a href="https://github.com/SchmidtDSE/unseea/blob/main/DESIGN.md">DESIGN.md §10</a></span>
     <span>Layer status per <a href="https://github.com/SchmidtDSE/unseea/blob/main/PROVENANCE.md">PROVENANCE.md</a></span>
   </div>
 </main>
@@ -578,6 +1002,22 @@ function draw(el, g, mark){
 }
 draw(document.getElementById("g0"), OPEN, false);
 draw(document.getElementById("g1"), CLOSE, true);
+
+// Minimal SQL highlighter. Runs over textContent, so if it fails the raw SQL still shows.
+(function () {
+  const KW = ["WITH","SELECT","FROM","WHERE","GROUP BY","ORDER BY","SEMI JOIN","LEFT JOIN","JOIN",
+    "ON","AND","OR","AS","NOT IN","IN","BETWEEN","DISTINCT","DESC","SUM","AVG","COUNT","ROUND",
+    "COALESCE","UNNEST","read_parquet","h3_cell_area","h3_grid_disk"];
+  const RE = new RegExp("(--[^\\n]*)|('(?:[^'])*')|\\b(" + KW.join("|") + ")\\b", "g");
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  document.querySelectorAll("details.sql pre code").forEach(function (el) {
+    el.innerHTML = esc(el.textContent).replace(RE, function (m, c, s, k) {
+      if (c) return '<span class="sqlc">' + c + "</span>";
+      if (s) return '<span class="sqls">' + s + "</span>";
+      return '<span class="sqlk">' + k + "</span>";
+    });
+  });
+})();
 
 const lg = document.getElementById("legend");
 ETS.forEach(function (e) {
