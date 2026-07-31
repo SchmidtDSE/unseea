@@ -1,0 +1,130 @@
+/* unseea documentation — shared design system
+   Tokens first; components style through tokens only, never inside a media query. */
+
+:root{
+  --paper:#eceee9; --panel:#f6f7f4; --ink:#151b18; --ink-2:#4a544e; --ink-3:#79837c;
+  --rule:#cdd3cc; --rule-2:#dde1da;
+  --accent:#0d6b62; --accent-soft:#0d6b6218; --rust:#a34a2c; --rust-soft:#a34a2c14;
+  --shadow:0 1px 2px #151b1810, 0 8px 24px #151b1808;
+
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#111614; --panel:#182020; --ink:#e4e9e5; --ink-2:#a3ada7; --ink-3:#78837c;
+    --rule:#2b3633; --rule-2:#222c29;
+    --accent:#4fb3a6; --accent-soft:#4fb3a61f; --rust:#d9805e; --rust-soft:#d9805e1a;
+    --shadow:0 1px 2px #0006, 0 8px 24px #0004;
+  }
+}
+:root[data-theme="light"]{
+  --paper:#eceee9; --panel:#f6f7f4; --ink:#151b18; --ink-2:#4a544e; --ink-3:#79837c;
+  --rule:#cdd3cc; --rule-2:#dde1da;
+  --accent:#0d6b62; --accent-soft:#0d6b6218; --rust:#a34a2c; --rust-soft:#a34a2c14;
+  --shadow:0 1px 2px #151b1810, 0 8px 24px #151b1808;
+}
+:root[data-theme="dark"]{
+  --paper:#111614; --panel:#182020; --ink:#e4e9e5; --ink-2:#a3ada7; --ink-3:#78837c;
+  --rule:#2b3633; --rule-2:#222c29;
+  --accent:#4fb3a6; --accent-soft:#4fb3a61f; --rust:#d9805e; --rust-soft:#d9805e1a;
+  --shadow:0 1px 2px #0006, 0 8px 24px #0004;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:400 15px/1.62 var(--sans); -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:var(--serif)}
+.mono{font-family:var(--mono)}
+a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:2px}
+
+.wrap{max-width:1080px; margin:0 auto; padding:0 clamp(18px,4vw,40px)}
+
+/* ---------- site nav ---------- */
+.sitenav{border-bottom:1px solid var(--rule); background:var(--panel)}
+.sitenav .wrap{display:flex; align-items:center; gap:22px; height:52px}
+.sitenav .brand{
+  font-family:var(--serif); font-size:1.05rem; font-weight:600; color:var(--ink);
+  text-decoration:none; letter-spacing:-.01em;
+}
+.sitenav .brand span{color:var(--accent)}
+.sitenav nav{display:flex; gap:18px; margin-left:auto; align-items:center}
+.sitenav nav a{
+  font-size:.82rem; color:var(--ink-2); text-decoration:none;
+}
+.sitenav nav a:hover,.sitenav nav a[aria-current="page"]{color:var(--ink)}
+.sitenav nav a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--accent)}
+#theme{
+  background:none; border:1px solid var(--rule); color:var(--ink-2); cursor:pointer;
+  border-radius:2px; font:inherit; font-size:.72rem; padding:3px 8px; line-height:1.4;
+}
+#theme:hover{color:var(--ink); border-color:var(--ink-3)}
+
+.page{padding:clamp(28px,5vw,60px) 0 96px}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink); padding-bottom:22px; display:flex; flex-direction:column; gap:14px}
+.eyebrow{font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:600}
+h1{
+  font-family:var(--serif); font-weight:600; font-size:clamp(1.85rem,4.2vw,2.85rem);
+  line-height:1.1; margin:0; text-wrap:balance; letter-spacing:-.01em;
+}
+.dek{max-width:64ch; color:var(--ink-2); font-size:1.02rem; margin:0}
+
+.facts{display:flex; flex-wrap:wrap; gap:0; border:1px solid var(--rule); border-radius:3px;
+  background:var(--panel); margin-top:26px; overflow:hidden}
+.fact{flex:1 1 150px; padding:13px 16px; border-right:1px solid var(--rule-2)}
+.fact:last-child{border-right:0}
+.fact dt{font-size:.65rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:0 0 3px}
+.fact dd{margin:0; font-size:1.15rem; font-weight:600; font-variant-numeric:tabular-nums; font-family:var(--mono)}
+
+/* ---------- sections ---------- */
+.sec{margin-top:clamp(44px,7vw,76px)}
+.sec > h2{font-family:var(--serif); font-size:1.45rem; font-weight:600; margin:0 0 6px; letter-spacing:-.005em}
+.sec > .sub{color:var(--ink-2); margin:0 0 24px; max-width:66ch; font-size:.95rem}
+
+/* ---------- notices ---------- */
+.notice{
+  margin-top:26px; padding:14px 18px; border-left:2px solid var(--accent);
+  background:var(--accent-soft); border-radius:0 3px 3px 0; font-size:.92rem; color:var(--ink-2);
+}
+.notice.warn{border-left-color:var(--rust); background:var(--rust-soft)}
+.notice b{color:var(--ink)}
+.notice p{margin:0 0 8px}
+.notice p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto; border:1px solid var(--rule); border-radius:4px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:.87rem; min-width:520px}
+th,td{padding:9px 14px; text-align:left; border-bottom:1px solid var(--rule-2)}
+thead th{font-size:.64rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:600; background:var(--paper)}
+tbody tr:last-child td{border-bottom:0}
+td.n{text-align:right; font-variant-numeric:tabular-nums; font-family:var(--mono)}
+td.n.neg{color:var(--rust)}
+tbody tr.tot td{font-weight:650; background:var(--paper); border-top:1px solid var(--rule)}
+
+/* ---------- tags & layer chips ---------- */
+.layer{font-family:var(--mono); font-size:.79rem; color:var(--ink); background:var(--accent-soft);
+  padding:1px 5px; border-radius:2px; word-break:break-word}
+.tag{font-size:.66rem; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);
+  border:1px solid var(--rule); border-radius:2px; padding:1px 5px; white-space:nowrap}
+.tag.have{color:var(--accent); border-color:var(--accent)}
+.tag.gap{color:var(--rust); border-color:var(--rust)}
+
+/* ---------- card grids ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px}
+.card{border:1px solid var(--rule); border-radius:4px; padding:15px 17px; background:var(--panel)}
+.card.flag{border-left:2px solid var(--rust); border-radius:0 4px 4px 0}
+.card h4{margin:0 0 6px; font-size:.92rem; font-weight:650}
+.card p{margin:0; font-size:.86rem; color:var(--ink-2)}
+
+/* ---------- footer ---------- */
+.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--rule); color:var(--ink-3);
+  font-size:.8rem; display:flex; flex-wrap:wrap; gap:6px 20px}
+.foot a{color:var(--ink-3)}

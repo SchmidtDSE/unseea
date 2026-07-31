@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>unseea — documentation</title>
+<meta name="description" content="Documentation for unseea: a UN SEEA-EA ecosystem accounting tool computing the five accounts for any area, with live land-use scenarios.">
+<link rel="stylesheet" href="assets/unseea.css">
+<script src="assets/theme.js"></script>
+<style>
+  .docs{display:flex; flex-direction:column; gap:12px}
+  .doc{
+    display:grid; grid-template-columns:auto 1fr auto; gap:0 18px; align-items:baseline;
+    padding:17px 20px; background:var(--panel); border:1px solid var(--rule); border-radius:4px;
+    text-decoration:none; color:inherit; box-shadow:var(--shadow);
+  }
+  a.doc:hover{border-color:var(--accent)}
+  .doc .idx{font-family:var(--serif); font-size:1.05rem; color:var(--accent); font-weight:600}
+  .doc h3{margin:0; font-size:1.02rem; font-weight:650; letter-spacing:-.005em}
+  .doc p{margin:5px 0 0; grid-column:2; font-size:.88rem; color:var(--ink-2); max-width:62ch}
+  .doc .state{font-size:.66rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+    border:1px solid var(--rule); border-radius:2px; padding:2px 7px; white-space:nowrap}
+  .doc.live .state{color:var(--accent); border-color:var(--accent)}
+  .doc.planned{opacity:.62; box-shadow:none}
+  @media (max-width:620px){
+    .doc{grid-template-columns:auto 1fr}
+    .doc .state{grid-column:2; justify-self:start; margin-top:8px}
+    .doc p{margin-bottom:2px}
+  }
+  .repo{display:flex; flex-direction:column; gap:9px}
+  .repo a{font-family:var(--mono); font-size:.85rem}
+  .repo span{color:var(--ink-2); font-size:.85rem}
+  .repo div{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header class="sitenav">
+  <div class="wrap">
+    <a class="brand" href="./">un<span>seea</span></a>
+    <nav>
+      <a href="./" aria-current="page">Docs</a>
+      <a href="seealand.html">SEEALand</a>
+      <a href="https://github.com/SchmidtDSE/unseea">GitHub</a>
+      <button id="theme" type="button">Dark</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap page">
+
+  <div class="mast">
+    <div class="eyebrow">Documentation</div>
+    <h1 class="serif">unseea</h1>
+    <p class="dek">A UN SEEA-EA decision planning tool. Draw any area on Earth, get its five UN
+    ecosystem accounts computed live from open data — then propose a land-use change and watch the
+    accounts recompute into the standard's own vocabulary: managed expansion, managed reduction,
+    degradation, enhancement, revaluation.</p>
+  </div>
+
+  <div class="notice">
+    <p><b>Status: scoping.</b> No application code yet. These pages explain the method the tool will
+    implement; the design documents in the repository carry the detail.</p>
+  </div>
+
+  <section class="sec">
+    <h2 class="serif">Explainers</h2>
+    <p class="sub">Written for someone who needs a working mental model of ecosystem accounting before
+    reading the design documents.</p>
+
+    <div class="docs">
+
+      <a class="doc live" href="seealand.html">
+        <span class="idx">01</span>
+        <h3>SEEALand, end to end</h3>
+        <span class="state">Published</span>
+        <p>The standard's own worked toy example — 250 hectares, six ecosystem types, one 2-hectare
+        conversion — traced through all five accounts. What each step does, what it consumes, and what
+        it produces. Our Phase 1 replication target.</p>
+      </a>
+
+      <div class="doc planned">
+        <span class="idx">02</span>
+        <h3>The h3 accounting primitives</h3>
+        <span class="state">Drafting</span>
+        <p>How each account reduces to a single grouped aggregation over hex cells, why fractional
+        coverage beats dominant-class for extent, and the measured latency budget per account.</p>
+      </div>
+
+      <div class="doc planned">
+        <span class="idx">03</span>
+        <h3>Condition, and the reference-level problem</h3>
+        <span class="state">Planned</span>
+        <p>Why rescaling a variable to [0,1] is the hardest unsolved step in the standard, and why
+        condition can never be averaged across ecosystem types.</p>
+      </div>
+
+      <div class="doc planned">
+        <span class="idx">04</span>
+        <h3>The scenario engine</h3>
+        <span class="state">Planned</span>
+        <p>What happens when a user repaints a hex: which accounts recompute, which assumptions become
+        visible controls, and how the result stays inside the standard's vocabulary.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2 class="serif">In the repository</h2>
+    <p class="sub">The design record lives in Markdown next to the code, and is the authoritative source
+    where these pages and the repository disagree.</p>
+    <div class="repo">
+      <div><a href="https://github.com/SchmidtDSE/unseea/blob/main/DESIGN.md">DESIGN.md</a>
+        <span>— what SEEA EA is, how ARIES for SEEA compares, the hard problems, the phased plan</span></div>
+      <div><a href="https://github.com/SchmidtDSE/unseea/blob/main/DATA.md">DATA.md</a>
+        <span>— data acquisition plan, per-account source selection, licence analysis</span></div>
+      <div><a href="https://github.com/SchmidtDSE/unseea/blob/main/PROVENANCE.md">PROVENANCE.md</a>
+        <span>— the planned layer list, and why each layer is in the app</span></div>
+      <div><a href="https://github.com/SchmidtDSE/unseea/blob/main/research/seea-ea-reference.md">research/seea-ea-reference.md</a>
+        <span>— distilled controlled vocabularies and table structures from the standard</span></div>
+      <div><a href="https://github.com/SchmidtDSE/unseea/issues/20">Issue #20</a>
+        <span>— the roadmap epic</span></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span>Berkeley Schmidt Center for Data Science &amp; Environment</span>
+    <span>Built on the <a href="https://github.com/boettiger-lab/geo-agent">geo-agent</a> runtime and the GLEN h3 catalog</span>
+    <span><a href="https://github.com/SchmidtDSE/unseea">Source</a></span>
+  </div>
+</main>
+
+</body>
+</html>
