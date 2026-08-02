@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unseea"
+version = "0.1.0"
+description = "A Python library implementing the five UN SEEA-EA accounts behind a narrow API, with a pluggable executor"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "BSD-2-Clause" }
+authors = [{ name = "Carl Boettiger" }]
+dependencies = ["duckdb>=1.0", "pandas>=2.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/SchmidtDSE/unseea"
+Documentation = "https://schmidtdse.github.io/unseea/"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
